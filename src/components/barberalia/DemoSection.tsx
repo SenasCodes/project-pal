@@ -5,58 +5,6 @@ import { LiveDot, SectionHeading } from "./Shared";
 const TEXT_AGENT_ID = "agent_2401kprqge5vfjstncfjqzczmncn";
 const VOICE_AGENT_ID = "agent_2701kpsk2vq6e0yas1293het2n94";
 
-const INITIAL_MSGS: Msg[] = [
-  { from: "me", text: "Olá, boa tarde", time: "14:28" },
-  { from: "them", text: "Olá! Boa tarde 👋 Sou o assistente da Barberalia. Posso ajudá-lo com informações sobre produtos, encomendas, devoluções ou qualquer outra questão. Como posso ajudar?", time: "14:28" },
-  { from: "me", text: "Tenho uma encomenda que fiz há 3 dias e ainda não recebi", time: "14:29" },
-  { from: "them", text: "Encontrei a sua encomenda! 🔍\n\nEncomenda *#BC-2025-0312* (Kit Aluno Barbeiro + Navalha Dovo + Creme Taylor — €342,00) saiu do nosso armazém em Albufeira no dia 3 de Abril e está em rota para Lisboa via Nacex.\n\nTracking: *NX20250402PT3120*\nPrevisão de entrega: hoje ou amanhã.\n\nPosso ajudar com mais alguma coisa?", time: "14:29" },
-];
-
-const SUG_GROUP_A = ["Onde está a minha encomenda?", "Quero devolver um produto", "Qual o preço das tesouras?", "Têm a Wahl Magic Clip?"];
-const SUG_GROUP_B = ["Como funciona a garantia?", "Qual o prazo de entrega?", "Podem emitir fatura?", "Têm descontos para profissionais?"];
-
-function replyFor(text: string) {
-  const t = text.toLowerCase();
-  if (/reclam|queixa|inaceit|urgente/.test(t))
-    return "Lamento muito esta situação. Vou escalar imediatamente para a nossa equipa que entrará em contacto consigo em menos de 2 horas.\n\nReferência: *#ESC-2025-047*";
-  if (/encomenda|onde|chegou|tracking/.test(t))
-    return "Verifiquei a sua encomenda *#BC-2025-0312*. 📦\n\nSaiu do armazém de Albufeira, em rota via Nacex (tracking *NX20250402PT3120*), entrega prevista em 24h. Quer notificação quando chegar?";
-  if (/devolv|trocar/.test(t))
-    return "O processo de devolução é simples: ↩️\n\n1️⃣ Fotografe o produto e a embalagem\n2️⃣ Contacte-nos em 48h após recepção\n3️⃣ Recolha marcada, custos por nossa conta\n\nPrazo máximo: 14 dias. Reembolso ou substituição total.";
-  if (/wahl|magic clip|clipper|m[aá]quina/.test(t))
-    return "A *Wahl Magic Clip Cordless* está disponível em stock. ✂️\n\nPreço: *€129,00*\nEntrega: 48h em Portugal continental\n\nQuer que reserve uma unidade?";
-  if (/pre[çc]o|quanto|custa|tesoura/.test(t))
-    return "Aqui estão as tesouras mais pedidas:\n\n• *Jaguar Pre Style* — €64,90\n• *Kamisori Excalibur* — €139,00\n• *Dovo Bergischer* — €87,00\n\nQuer ficha técnica de alguma?";
-  if (/garant/.test(t))
-    return "As condições de garantia são:\n\n• *Consumidores:* 2 anos\n• *Profissionais:* 6 meses\n\nAplica-se a defeitos de fabrico. Desgaste natural excluído.";
-  if (/prazo|entrega|quando/.test(t))
-    return "Prazos de entrega:\n\n• Portugal continental: *24–48h*\n• Ilhas: 3–5 dias úteis\n• Envio *grátis* acima de €75\n\nPara Braga: normalmente 24h via Nacex.";
-  if (/fatur|factura|nif/.test(t))
-    return "Para emissão de fatura, envie por favor:\n\n📧 *clientes@barberalia.com*\n\nCom o nº da encomenda + NIF + nome/razão social. Emitimos e enviamos em poucos minutos.";
-  if (/desconto|profissional|barbeiro|barbearia|pro/.test(t))
-    return "Temos *Conta PRO Barberalia* para profissionais. 💈\n\n• Preços especiais\n• Condições de pagamento\n• Catálogo alargado\n\nPosso pedir à equipa que entre em contacto? Basta dizer o nome e o melhor horário.";
-  if (/obrigad|percebo|^ok$|perfeito/.test(t))
-    return "Fico à disposição! Se precisar de mais alguma coisa é só escrever. 😊";
-  if (/ol[aá]|bom dia|boa tarde|boa noite/.test(t)) {
-    const h = new Date().getHours();
-    const g = h < 12 ? "Bom dia" : h < 19 ? "Boa tarde" : "Boa noite";
-    return `${g}! 👋 Sou o assistente da Barberalia — como posso ajudar?`;
-  }
-  return "Registei o seu pedido. Posso ajudar com: estado de encomendas, devoluções, preços de produtos, facturação ou falar com a equipa. Qual destes temas?";
-}
-
-function renderRich(text: string) {
-  const parts = text.split(/(\*[^*]+\*)/g);
-  return parts.map((p, i) =>
-    p.startsWith("*") && p.endsWith("*") ? (
-      <strong key={i} className="font-medium text-gold-light">
-        {p.slice(1, -1)}
-      </strong>
-    ) : (
-      <span key={i}>{p}</span>
-    ),
-  );
-}
 
 function ChatDemo() {
   return (
