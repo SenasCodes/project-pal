@@ -1,12 +1,9 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useState } from "react";
 import { Icon } from "./Icon";
 import { LiveDot, SectionHeading } from "./Shared";
 
-interface Msg {
-  from: "me" | "them";
-  text: string;
-  time: string;
-}
+const TEXT_AGENT_ID = "agent_2401kprqge5vfjstncfjqzczmncn";
+const VOICE_AGENT_ID = "agent_2701kpsk2vq6e0yas1293het2n94";
 
 const INITIAL_MSGS: Msg[] = [
   { from: "me", text: "Olá, boa tarde", time: "14:28" },
