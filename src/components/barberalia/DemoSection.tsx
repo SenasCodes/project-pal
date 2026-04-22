@@ -9,13 +9,7 @@ const VOICE_AGENT_ID = "agent_2701kpsk2vq6e0yas1293het2n94";
 type ChatMsg = { role: "user" | "agent"; text: string; id: string };
 
 function ChatDemoInner() {
-  const [messages, setMessages] = useState<ChatMsg[]>([
-    {
-      id: "seed",
-      role: "agent",
-      text: "Olá! Sou a Barberalia. Em que posso ajudar — encomendas, stock, recomendações?",
-    },
-  ]);
+  const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
   const [starting, setStarting] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -208,7 +202,7 @@ function VoiceDemoInner() {
       await navigator.mediaDevices.getUserMedia({ audio: true });
       await conversation.startSession({
         agentId: VOICE_AGENT_ID,
-        connectionType: "webrtc",
+        connectionType: "websocket",
       });
     } catch (e: any) {
       console.error(e);
