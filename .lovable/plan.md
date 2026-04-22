@@ -1,56 +1,61 @@
 
 
-## Plano — Opção 3 (browser chama ElevenLabs directamente)
+## Plano — Webhook ElevenLabs (push em vez de polling)
 
-A `xi-api-key` será incluída no código do frontend e ficará visível a quem inspeccionar o site. Aceitas o risco de a chave poder ser usada por terceiros até a revogares.
+### Arquitectura
 
-### Como vai funcionar
+1. **Lovable Cloud activado** (necessário para edge function pública + tabela).
+2. **Tabela `conversas`** (Supabase): guarda o que o webhook envia.
+   - Campos: `id` (uuid), `conversation_id` (text unique), `agent_id`, `start_time_unix_secs`, `duration_secs`, `summary`, `intent`, `topic_area`, `customer_type`, `product_name`, `budget`, `ready_to_buy`, `outcome`, `order_number`, `satisfaction`, `transcript` (jsonb), `raw` (jsonb), `created_at`.
+   - **RLS**: SELECT público (página é pública); INSERT só via service role.
+   - **Realtime activado** (REPLICA IDENTITY FULL + publication).
+3. **Edge function `elevenlabs-webhook`** (`verify_jwt = false`):
+   - Recebe POST do ElevenLabs.
+   - Valida header `ElevenLabs-Signature` (HMAC-SHA256) com o secret partilhado.
+   - Extrai `transcript_summary` + `data_collection_results` + `transcript`.
+   - `UPSERT` na tabela `conversas` por `conversation_id` (idempotente — se reenviarem, não duplica).
+   - Devolve `200 OK`.
+4. **Página `/relatorios`**: já criada — só troco a fonte de dados:
+   - Remover `useConversas` (polling ElevenLabs).
+   - Novo `useConversasDb` que faz `select` inicial à tabela + subscrição realtime `postgres_changes` (INSERT/UPDATE).
+   - `pulse-gold` 2s para novos cards.
+5. **Apagar** `src/lib/elevenlabs-config.ts` (chave já não exposta no frontend ✅).
 
-A página `/relatorios` faz `fetch` directamente a:
-```
-GET https://api.elevenlabs.io/v1/convai/conversations?agent_id=<VOICE_AGENT_ID>&page_size=100
-GET https://api.elevenlabs.io/v1/convai/conversations/<conversation_id>
-```
-com header `xi-api-key: <CHAVE>`.
+### Configuração ElevenLabs (passos para ti, no fim)
 
-Fluxo:
-1. Ao abrir a página, lista conversas do agente de voz.
-2. Para cada conversa, busca o detalhe (transcript_summary + data_collection_results).
-3. Renderiza cards ordenados do mais recente.
-4. **Polling cada 30s** para apanhar novas conversas (substitui o realtime). Novos cards entram com `pulse-gold` 2s.
+No painel ElevenLabs:
+- **Workspace → Webhooks → Create a Webhook**
+  - Name: `Barberalia Conversas`
+  - Callback URL: `https://<PROJECT-REF>.supabase.co/functions/v1/elevenlabs-webhook` (dou-te o URL exacto após criar a função)
+  - Auth Method: **HMAC** → ele gera um secret → copias e cola-lo quando eu pedir (`ELEVENLABS_WEBHOOK_SECRET`)
+- **No agente de voz** (`agent_2701kpsk2vq6e0yas1293het2n94`) → Settings → Post-call webhook → seleccionar o webhook criado → activar `transcript`, `analysis`, `data_collection_results`.
 
-### Onde guardo a chave
+### Vantagens vs polling
 
-Num ficheiro `src/lib/elevenlabs-config.ts` com a constante exportada. Fica claramente marcado com comentário a avisar que está exposta. Se quiseres revogar/rodar, mudas só nesse ficheiro.
+- ✅ Sem chave API exposta no frontend
+- ✅ Push em tempo real (não 30s de delay)
+- ✅ Sem rate-limit ElevenLabs
+- ✅ Histórico persistente próprio (não dependes da retenção deles)
+- ✅ Idempotente (UPSERT por `conversation_id`)
 
-### Ficheiros a criar/alterar
+### Ficheiros a alterar/criar
 
-- **`src/lib/elevenlabs-config.ts`** (novo) — `XI_API_KEY` + `VOICE_AGENT_ID` + `BASE_URL`. Comentário "PUBLIC — exposed in client bundle".
-- **`src/lib/relatorios-types.ts`** (novo) — tipos do payload ElevenLabs (`ConversationListItem`, `ConversationDetail`, `DataCollectionResults`).
-- **`src/lib/conversas-i18n.ts`** (novo) — mapas PT para `intent`, `topic_area`, `customer_type`, `outcome`; cores para `satisfaction`/`outcome`.
-- **`src/hooks/use-conversas.ts`** (novo) — `useEffect` faz fetch inicial + `setInterval` de 30s; devolve `{ conversas, loading, newIds }` (newIds usa-se 2s para o pulse).
-- **`src/pages/Relatorios.tsx`** (novo, default export) — Navbar local "BARBERALIA · Relatórios IA", header (label mono "CONVERSAS — HISTÓRICO" + título Cormorant "Relatórios de *Conversa*" + contador mono), lista de cards expansíveis, estado vazio com microfone SVG.
-- **`src/components/barberalia/RelatoriosCard.tsx`** (novo) — card individual: timestamp, 3 badges, intenção, produto, orçamento, 🔥 pronto-para-comprar, ponto satisfação; click → expande resumo + order_number + duração.
-- **`src/components/barberalia/RelatoriosTeaser.tsx`** (novo) — bloco "06 — Relatórios", título "Cada conversa, *registada*", botão `<a href="/relatorios" target="_blank" rel="noopener">`.
-- **`src/App.tsx`** — adicionar `<Route path="/relatorios" element={<Relatorios />} />`.
-- **`src/pages/Index.tsx`** — inserir `<RelatoriosTeaser />` entre `<DemoSection />` e `<Dashboard />`.
-- **`src/index.css`** — keyframes `pulse-gold` (2s) + `fade-in-up` para novos cards.
+- **Activar Lovable Cloud** (região: Europe).
+- **Migração SQL**: criar tabela `conversas` + RLS + realtime.
+- **`supabase/functions/elevenlabs-webhook/index.ts`** (novo).
+- **`supabase/config.toml`**: registar função com `verify_jwt = false`.
+- **Secret**: `ELEVENLABS_WEBHOOK_SECRET` (peço-te depois).
+- **`src/hooks/use-conversas.ts`** → reescrever para usar Supabase client (select + realtime).
+- **`src/lib/elevenlabs-config.ts`** → apagar.
+- **`src/lib/relatorios-types.ts`** → simplificar (manter só `ConversaCard`).
+- **Sem alterações** ao `Relatorios.tsx`, `RelatoriosCard.tsx`, `RelatoriosTeaser.tsx`, `i18n` — interface mantém-se igual.
 
-### Visual (resumo)
+### Ordem de execução
 
-- Tema mantém-se: `#0E0E0C` fundo, `#E8E4DC` texto, `#B8955A` acento, Cormorant + DM Mono + DM Sans.
-- Cards: fundo `#161614`, border `rgba(184,149,90,0.15)`, hover `rgba(184,149,90,0.35)`.
-- Badges com as cores exactas que pediste (resolvido verde, escalado vermelho, intenção compra dourado, abandonado cinza).
-- Expansão com `max-height` transition + opacity.
+1. Activar Lovable Cloud (precisa da tua aprovação no botão).
+2. Criar tabela + edge function + reescrever hook.
+3. Dou-te o URL do webhook + peço o secret HMAC.
+4. Configuras no painel ElevenLabs e fazes uma chamada de teste.
 
-### O que precisas de me dar
-
-A `xi-api-key` da tua conta ElevenLabs (Profile → API Keys). Cola-a na próxima mensagem e eu meto-a no `elevenlabs-config.ts`. O `VOICE_AGENT_ID` já o tenho do `DemoSection.tsx`.
-
-### Avisos
-
-- **Chave exposta**: qualquer pessoa que abra DevTools no site vê a chave e pode usá-la até a revogares. Recomendação: cria uma chave dedicada com permissões mínimas (só `convai_read`) para limitar o estrago.
-- **CORS**: a API ElevenLabs aceita requests do browser com `xi-api-key` — testado, funciona.
-- **Rate limits**: polling de 30s × 100 conversas = bem dentro dos limites gratuitos.
-- **Sem alterações** à Navbar principal, Hero, DemoSection, Dashboard, Roadmap, Projecao, Footer.
+Confirma que avanço com a activação do Lovable Cloud.
 
