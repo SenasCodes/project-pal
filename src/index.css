@@ -164,18 +164,4 @@
   animation: pulse-red 2s infinite;
 }
 
-/* ElevenLabs Convai widget — embed inline and theme to brand */
-elevenlabs-convai {
-  display: block;
-  width: 100%;
-  height: 100%;
-  --el-accent: hsl(var(--gold));
-  --el-accent-foreground: hsl(var(--dark));
-  --el-bg: hsl(var(--dark-2));
-  --el-surface: hsl(var(--dark-3));
-  --el-text: hsl(var(--text));
-  --el-text-muted: hsl(var(--text-muted));
-  --el-border: hsl(var(--gold) / 0.25);
-  --el-radius: 0.25rem;
-}
 
