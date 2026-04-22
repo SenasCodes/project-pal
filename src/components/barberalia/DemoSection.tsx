@@ -93,7 +93,7 @@ function ChatDemoInner() {
 
         <div
           ref={scrollRef}
-          className="relative flex min-h-[480px] w-full flex-1 flex-col gap-3 overflow-y-auto p-5"
+          className="relative flex h-[480px] max-h-[480px] w-full flex-1 flex-col gap-3 overflow-y-auto p-5"
           style={{
             background:
               "radial-gradient(circle at 20% 10%, hsl(var(--gold) / 0.04), transparent 40%), hsl(var(--dark-2))",
