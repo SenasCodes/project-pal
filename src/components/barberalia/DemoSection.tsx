@@ -327,6 +327,22 @@ function VoiceDemoInner() {
   );
 }
 
+function ChatDemo() {
+  return (
+    <ConversationProvider textOnly>
+      <ChatDemoInner />
+    </ConversationProvider>
+  );
+}
+
+function VoiceDemo() {
+  return (
+    <ConversationProvider>
+      <VoiceDemoInner />
+    </ConversationProvider>
+  );
+}
+
 export function DemoSection() {
   const [tab, setTab] = useState<"chat" | "voice">("chat");
   return (
