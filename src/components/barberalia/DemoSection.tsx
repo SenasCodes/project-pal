@@ -60,7 +60,7 @@ function ChatDemo() {
 
   useEffect(() => {
     return () => {
-      conversation.endSession().catch(() => {});
+      try { void conversation.endSession(); } catch {}
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -224,7 +224,7 @@ function VoiceDemo() {
 
   useEffect(() => {
     return () => {
-      conversation.endSession().catch(() => {});
+      try { void conversation.endSession(); } catch {}
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
