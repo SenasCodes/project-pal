@@ -40,6 +40,13 @@ function ChatDemoInner() {
         agentId: TEXT_AGENT_ID,
         connectionType: "websocket",
       });
+      try {
+        conversation.sendContextualUpdate(
+          "Estás a operar em modo CHAT DE TEXTO (WhatsApp), não em chamada de voz. Podes e deves enviar URLs, links de produto/checkout e texto formatado normalmente. O utilizador vê tudo em texto."
+        );
+      } catch (e) {
+        console.warn("contextual update failed", e);
+      }
     } catch (e) {
       console.error("Failed to start chat", e);
     } finally {
@@ -75,9 +82,9 @@ function ChatDemoInner() {
   };
 
   return (
-    <div className="grid min-h-[640px] grid-cols-1 gap-px border bg-brand-line border-brand lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+    <div className="grid h-[640px] grid-cols-1 gap-px overflow-hidden border bg-brand-line border-brand lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
       {/* Chat frame */}
-      <div className="flex min-h-0 flex-col bg-dark-2">
+      <div className="flex min-h-0 flex-col overflow-hidden bg-dark-2">
         <div className="flex items-center gap-3.5 border-b border-brand bg-dark-3 px-5 py-[18px]">
           <div className="grid h-[38px] w-[38px] place-items-center rounded-full bg-gradient-to-br from-gold to-dark-4 font-serif text-xl font-semibold text-dark">
             B
@@ -93,7 +100,7 @@ function ChatDemoInner() {
 
         <div
           ref={scrollRef}
-          className="relative flex min-h-[480px] w-full flex-1 flex-col gap-3 overflow-y-auto p-5"
+          className="relative flex h-[480px] max-h-[480px] w-full flex-1 flex-col gap-3 overflow-y-auto p-5"
           style={{
             background:
               "radial-gradient(circle at 20% 10%, hsl(var(--gold) / 0.04), transparent 40%), hsl(var(--dark-2))",
