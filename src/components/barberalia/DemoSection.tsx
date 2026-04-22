@@ -8,7 +8,7 @@ const VOICE_AGENT_ID = "agent_2701kpsk2vq6e0yas1293het2n94";
 
 type ChatMsg = { role: "user" | "agent"; text: string; id: string };
 
-function ChatDemo() {
+function ChatDemoInner() {
   const [messages, setMessages] = useState<ChatMsg[]>([
     {
       id: "seed",
@@ -186,7 +186,7 @@ function ChatDemo() {
   );
 }
 
-function VoiceDemo() {
+function VoiceDemoInner() {
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
