@@ -16,9 +16,14 @@ export function Footer() {
           <span className="inline-flex items-center gap-2 rounded-sm border border-brand-green-light/30 bg-brand-green-light/5 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-brand-green-light">
             <LiveDot /> Demo activa
           </span>
-          <div className="font-mono text-ink-dim">
-            Desenvolvido por Waldyn · waldyn.pt
-          </div>
+          <a
+            href="https://waldyn.eu/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-mono text-ink-dim transition-colors hover:text-gold-light"
+          >
+            Powered by Waldyn · waldyn.eu
+          </a>
         </div>
       </div>
     </footer>
