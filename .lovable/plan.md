@@ -2,80 +2,71 @@
 
 ## Diagnóstico
 
-O widget ElevenLabs aparece como **bolha flutuante no canto inferior direito** (visível no screenshot — "Need help? · Start a chat") em vez de embebido nas zonas pretas dos demos. Por isso:
-- O "ecrã" do chat WhatsApp e o cartão dourado de voz aparecem **vazios**.
-- A bolha tem cores azul/branco que **destoam** do tema dourado/escuro Barberalia.
-- Há **uma só bolha partilhada** entre os dois separadores (o último a renderizar ganha).
+Pela screenshot:
+- O **widget de chat** abre como bolha branca flutuante no canto, sobreposta ao painel "Dados em tempo real" — devia estar **embebido na zona escura à esquerda** (o "ecrã" do telemóvel).
+- O **widget de voz** também aparece como bolha no canto — devia estar **dentro do cartão dourado** à direita.
+- Há **duas bolhas visíveis ao mesmo tempo** (ícone laranja + telefone) → os dois widgets estão montados em simultâneo, mesmo só um separador estar visível.
+- As cores brancas da bolha **destoam** completamente do tema dourado/escuro.
+
+A razão técnica: `variant="expanded"` não força inline em todos os browsers/versões do widget — o widget continua a renderizar-se como floating bubble, ancorado ao `<body>`, ignorando o container pai. Além disso, ambos os `<elevenlabs-convai>` (chat e voz) ficam no DOM porque o `Fragment key={tab}` não desmonta o widget interno (é um custom element com estado próprio).
 
 ## Solução
 
-Usar o atributo oficial `variant="expanded"` para forçar o widget a renderizar **em modo aberto e inline** dentro dos containers, em vez de bolha flutuante. Combinar com atributos visuais (`avatar-orb-color-1/2`, `action-text`, `start-call-text`, etc.) para alinhar tudo ao tema Barberalia em português.
+**1. Forçar verdadeiro embed inline com `<iframe>`**
 
-## Alterações em `src/components/barberalia/DemoSection.tsx`
-
-**Widget de Texto (Chat WhatsApp)** — dentro da moldura escura/dourada existente:
-```jsx
-<elevenlabs-convai
-  agent-id={TEXT_AGENT_ID}
-  variant="expanded"
-  avatar-orb-color-1="#B8955A"   // gold
-  avatar-orb-color-2="#D4B483"   // gold-light
-  action-text="Falar com a Barberalia"
-  start-call-text="Iniciar conversa"
-  end-call-text="Terminar"
-  listening-text="A ouvir…"
-  speaking-text="A responder…"
-  expand-text="Abrir chat"
-/>
+Em vez do custom element `<elevenlabs-convai>` (que renderiza floating), usar o **iframe oficial do ElevenLabs**:
 ```
-Wrapper passa a `min-h-[600px]` com `w-full` para o widget preencher a área preta do "ecrã do telemóvel".
-
-**Widget de Voz** — dentro do cartão dourado:
-- Mesmos atributos visuais + `variant="expanded"`.
-- Remover o `border-dashed` (parece placeholder), usar borda sólida `border-brand-bright` com o mesmo gradiente radial dourado do ChatDemo.
-- Substituir o texto "Agente real · ElevenLabs · voz" por uma legenda mais discreta no rodapé.
-
-**Tabs (chat/voz)**: já é o caminho certo — o `key={tab}` no Fragment força re-mount, garantindo que apenas um widget existe no DOM de cada vez (resolve o conflito da bolha partilhada).
-
-## Estilização CSS adicional em `src/index.css`
-
-Adicionar regras para o custom element preencher o container e harmonizar com o tema escuro:
-```css
-elevenlabs-convai {
-  width: 100%;
-  height: 100%;
-  display: block;
-  --el-accent: hsl(var(--gold));
-  --el-bg: hsl(var(--dark-2));
-  --el-text: hsl(var(--text));
-}
+https://elevenlabs.io/app/talk-to?agent_id=AGENT_ID
 ```
-*(O widget expõe shadow DOM; só as variáveis CSS suportadas pelo widget e os atributos HTML têm efeito garantido. Cor primária e textos PT cobrem 90% da percepção visual.)*
+O iframe respeita 100% as dimensões do container pai, não tem bolha flutuante, e pode ser estilizado com border/background à volta. Isto resolve definitivamente o problema visual.
 
-## Layout final esperado
+**2. Montar apenas o widget do separador activo**
+
+Renderização condicional dura: o `<iframe>` do chat só existe quando `tab === "chat"`, idem para voz. Sem `Fragment key`, sem ambos no DOM. Garante zero bolhas duplicadas.
+
+**3. Remover o script global do widget bubble**
+
+O `<script src="https://unpkg.com/@elevenlabs/convai-widget-embed">` no `index.html` deixa de ser necessário (já não usamos o custom element). Remover evita que ele continue a injectar bolhas no body.
+
+**4. Posicionamento e cores**
+
+- **Chat (separador WhatsApp)**: iframe ocupa 100% da zona escura à esquerda do grid, com `min-h-[640px]`. Painel "Dados em tempo real" mantém-se intocado à direita.
+- **Voz**: iframe dentro do cartão dourado à direita do grid, `min-h-[560px]`, com a mesma borda dourada e gradiente radial. Lista de features mantém-se à esquerda.
+- Borda dourada (`border-brand`) + fundo `dark-2` à volta do iframe → moldura coerente com o resto da página.
+- Adicionar `allow="microphone"` no iframe de voz (essencial para o microfone funcionar).
+
+## Layout final
 
 ```text
-┌─ Chat WhatsApp ─────────────────────┬─ Dados em tempo real ─┐
-│ [Header dourado: B · Barberalia]    │ Cliente: João M.      │
-│                                     │ Intenção: Pós-venda   │
-│   ┌─ widget ElevenLabs ─┐           │ Encomenda: #BC-…      │
-│   │ orb dourado          │           │ Estado: Em trânsito   │
-│   │ "Iniciar conversa"   │           │ Escalada: Não nec.    │
-│   │ histórico mensagens  │           │                       │
-│   └──────────────────────┘           │                       │
+┌─ Tab: Chat WhatsApp ────────────────┬─ Dados em tempo real ─┐
+│ [Header: B · Barberalia · Online]    │ Cliente: João M.      │
+│ ┌─ iframe ElevenLabs ────────────┐   │ Intenção: Pós-venda   │
+│ │  conversa real, fundo escuro   │   │ Encomenda: #BC-…      │
+│ │  ocupa toda a área             │   │ Estado: Em trânsito   │
+│ │                                │   │ Escalada: Não nec.    │
+│ └────────────────────────────────┘   │                       │
 └──────────────────────────────────────┴───────────────────────┘
+
+┌─ Tab: Agente de Voz ────────────────────────────────────────┐
+│  Agente de Voz                  ┌─ iframe ElevenLabs ─────┐ │
+│  • voz natural PT               │  orb + botão microfone  │ │
+│  • stock em tempo real          │  conversa por voz       │ │
+│  • escala para humano           │                         │ │
+│                                 └─────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
 ```
-
-Mesmo princípio para o separador Voz: cartão dourado preenchido pelo widget expandido.
-
-## Notas
-
-- **Atributos suportados**: `variant`, `avatar-orb-color-1/2`, `action-text`, `start-call-text`, `end-call-text`, `listening-text`, `speaking-text`, `expand-text` são oficiais (confirmado na doc). Não tematização total do interior do widget é possível sem o SDK React `@elevenlabs/react`, mas estes atributos + o cartão à volta dão a sensação "parte da app".
-- **Allowed origins**: confirma no painel ElevenLabs que `*.lovable.app` está autorizado para os 2 agentes — sem isto o widget não carrega.
-- **Sem alterações** ao Hero, Dashboard, Roadmap, Footer ou tabs.
 
 ## Ficheiros a alterar
 
-- `src/components/barberalia/DemoSection.tsx` — adicionar atributos `variant="expanded"` + tematização nos dois `<elevenlabs-convai>`, ajustar containers para o widget preencher (full width/height).
-- `src/index.css` — regras globais para o custom element ocupar 100% do container.
+- **`index.html`** — remover o `<script>` do `convai-widget-embed` (já não é preciso).
+- **`src/components/barberalia/DemoSection.tsx`** — substituir os dois `<elevenlabs-convai>` por `<iframe src="https://elevenlabs.io/app/talk-to?agent_id=...">`, com renderização condicional rígida (sem Fragment partilhado), `allow="microphone"` no de voz, e moldura visual coerente.
+- **`src/vite-env.d.ts`** — remover a declaração do custom element `elevenlabs-convai` (deixa de ser usada).
+- **`src/index.css`** — remover as regras `elevenlabs-convai { ... }` adicionadas anteriormente.
+
+## Notas
+
+- **Allowed origins**: confirma novamente no painel ElevenLabs de cada agente que `https://*.lovable.app` está autorizado — o iframe respeita as mesmas regras CORS do widget.
+- **Sem bolhas flutuantes**: garantido — o iframe é um elemento DOM normal, não injecta nada no `body`.
+- **Tema do interior**: o conteúdo do iframe é controlado pelo ElevenLabs (não conseguimos mudar fontes/cores internas sem usar o SDK React). O que ganhamos é controlo total do **enquadramento** — borda dourada, fundo escuro, posicionamento perfeito — que era o problema principal.
+- **Sem alterações** ao Hero, Dashboard, Roadmap, Footer, Navbar ou tabs.
 
