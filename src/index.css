@@ -164,4 +164,14 @@
   animation: pulse-red 2s infinite;
 }
 
+@keyframes pulse-gold {
+  0% { box-shadow: 0 0 0 0 hsl(var(--gold) / 0.55); border-color: hsl(var(--gold) / 0.6); }
+  70% { box-shadow: 0 0 0 12px hsl(var(--gold) / 0); }
+  100% { box-shadow: 0 0 0 0 hsl(var(--gold) / 0); border-color: hsl(var(--gold) / 0.15); }
+}
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 
