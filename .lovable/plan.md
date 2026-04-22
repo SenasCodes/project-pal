@@ -1,61 +1,72 @@
 
 
-## Plano — Webhook ElevenLabs (push em vez de polling)
+## Diagnóstico
 
-### Arquitectura
+Pela screenshot:
+- O **widget de chat** abre como bolha branca flutuante no canto, sobreposta ao painel "Dados em tempo real" — devia estar **embebido na zona escura à esquerda** (o "ecrã" do telemóvel).
+- O **widget de voz** também aparece como bolha no canto — devia estar **dentro do cartão dourado** à direita.
+- Há **duas bolhas visíveis ao mesmo tempo** (ícone laranja + telefone) → os dois widgets estão montados em simultâneo, mesmo só um separador estar visível.
+- As cores brancas da bolha **destoam** completamente do tema dourado/escuro.
 
-1. **Lovable Cloud activado** (necessário para edge function pública + tabela).
-2. **Tabela `conversas`** (Supabase): guarda o que o webhook envia.
-   - Campos: `id` (uuid), `conversation_id` (text unique), `agent_id`, `start_time_unix_secs`, `duration_secs`, `summary`, `intent`, `topic_area`, `customer_type`, `product_name`, `budget`, `ready_to_buy`, `outcome`, `order_number`, `satisfaction`, `transcript` (jsonb), `raw` (jsonb), `created_at`.
-   - **RLS**: SELECT público (página é pública); INSERT só via service role.
-   - **Realtime activado** (REPLICA IDENTITY FULL + publication).
-3. **Edge function `elevenlabs-webhook`** (`verify_jwt = false`):
-   - Recebe POST do ElevenLabs.
-   - Valida header `ElevenLabs-Signature` (HMAC-SHA256) com o secret partilhado.
-   - Extrai `transcript_summary` + `data_collection_results` + `transcript`.
-   - `UPSERT` na tabela `conversas` por `conversation_id` (idempotente — se reenviarem, não duplica).
-   - Devolve `200 OK`.
-4. **Página `/relatorios`**: já criada — só troco a fonte de dados:
-   - Remover `useConversas` (polling ElevenLabs).
-   - Novo `useConversasDb` que faz `select` inicial à tabela + subscrição realtime `postgres_changes` (INSERT/UPDATE).
-   - `pulse-gold` 2s para novos cards.
-5. **Apagar** `src/lib/elevenlabs-config.ts` (chave já não exposta no frontend ✅).
+A razão técnica: `variant="expanded"` não força inline em todos os browsers/versões do widget — o widget continua a renderizar-se como floating bubble, ancorado ao `<body>`, ignorando o container pai. Além disso, ambos os `<elevenlabs-convai>` (chat e voz) ficam no DOM porque o `Fragment key={tab}` não desmonta o widget interno (é um custom element com estado próprio).
 
-### Configuração ElevenLabs (passos para ti, no fim)
+## Solução
 
-No painel ElevenLabs:
-- **Workspace → Webhooks → Create a Webhook**
-  - Name: `Barberalia Conversas`
-  - Callback URL: `https://<PROJECT-REF>.supabase.co/functions/v1/elevenlabs-webhook` (dou-te o URL exacto após criar a função)
-  - Auth Method: **HMAC** → ele gera um secret → copias e cola-lo quando eu pedir (`ELEVENLABS_WEBHOOK_SECRET`)
-- **No agente de voz** (`agent_2701kpsk2vq6e0yas1293het2n94`) → Settings → Post-call webhook → seleccionar o webhook criado → activar `transcript`, `analysis`, `data_collection_results`.
+**1. Forçar verdadeiro embed inline com `<iframe>`**
 
-### Vantagens vs polling
+Em vez do custom element `<elevenlabs-convai>` (que renderiza floating), usar o **iframe oficial do ElevenLabs**:
+```
+https://elevenlabs.io/app/talk-to?agent_id=AGENT_ID
+```
+O iframe respeita 100% as dimensões do container pai, não tem bolha flutuante, e pode ser estilizado com border/background à volta. Isto resolve definitivamente o problema visual.
 
-- ✅ Sem chave API exposta no frontend
-- ✅ Push em tempo real (não 30s de delay)
-- ✅ Sem rate-limit ElevenLabs
-- ✅ Histórico persistente próprio (não dependes da retenção deles)
-- ✅ Idempotente (UPSERT por `conversation_id`)
+**2. Montar apenas o widget do separador activo**
 
-### Ficheiros a alterar/criar
+Renderização condicional dura: o `<iframe>` do chat só existe quando `tab === "chat"`, idem para voz. Sem `Fragment key`, sem ambos no DOM. Garante zero bolhas duplicadas.
 
-- **Activar Lovable Cloud** (região: Europe).
-- **Migração SQL**: criar tabela `conversas` + RLS + realtime.
-- **`supabase/functions/elevenlabs-webhook/index.ts`** (novo).
-- **`supabase/config.toml`**: registar função com `verify_jwt = false`.
-- **Secret**: `ELEVENLABS_WEBHOOK_SECRET` (peço-te depois).
-- **`src/hooks/use-conversas.ts`** → reescrever para usar Supabase client (select + realtime).
-- **`src/lib/elevenlabs-config.ts`** → apagar.
-- **`src/lib/relatorios-types.ts`** → simplificar (manter só `ConversaCard`).
-- **Sem alterações** ao `Relatorios.tsx`, `RelatoriosCard.tsx`, `RelatoriosTeaser.tsx`, `i18n` — interface mantém-se igual.
+**3. Remover o script global do widget bubble**
 
-### Ordem de execução
+O `<script src="https://unpkg.com/@elevenlabs/convai-widget-embed">` no `index.html` deixa de ser necessário (já não usamos o custom element). Remover evita que ele continue a injectar bolhas no body.
 
-1. Activar Lovable Cloud (precisa da tua aprovação no botão).
-2. Criar tabela + edge function + reescrever hook.
-3. Dou-te o URL do webhook + peço o secret HMAC.
-4. Configuras no painel ElevenLabs e fazes uma chamada de teste.
+**4. Posicionamento e cores**
 
-Confirma que avanço com a activação do Lovable Cloud.
+- **Chat (separador WhatsApp)**: iframe ocupa 100% da zona escura à esquerda do grid, com `min-h-[640px]`. Painel "Dados em tempo real" mantém-se intocado à direita.
+- **Voz**: iframe dentro do cartão dourado à direita do grid, `min-h-[560px]`, com a mesma borda dourada e gradiente radial. Lista de features mantém-se à esquerda.
+- Borda dourada (`border-brand`) + fundo `dark-2` à volta do iframe → moldura coerente com o resto da página.
+- Adicionar `allow="microphone"` no iframe de voz (essencial para o microfone funcionar).
+
+## Layout final
+
+```text
+┌─ Tab: Chat WhatsApp ────────────────┬─ Dados em tempo real ─┐
+│ [Header: B · Barberalia · Online]    │ Cliente: João M.      │
+│ ┌─ iframe ElevenLabs ────────────┐   │ Intenção: Pós-venda   │
+│ │  conversa real, fundo escuro   │   │ Encomenda: #BC-…      │
+│ │  ocupa toda a área             │   │ Estado: Em trânsito   │
+│ │                                │   │ Escalada: Não nec.    │
+│ └────────────────────────────────┘   │                       │
+└──────────────────────────────────────┴───────────────────────┘
+
+┌─ Tab: Agente de Voz ────────────────────────────────────────┐
+│  Agente de Voz                  ┌─ iframe ElevenLabs ─────┐ │
+│  • voz natural PT               │  orb + botão microfone  │ │
+│  • stock em tempo real          │  conversa por voz       │ │
+│  • escala para humano           │                         │ │
+│                                 └─────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Ficheiros a alterar
+
+- **`index.html`** — remover o `<script>` do `convai-widget-embed` (já não é preciso).
+- **`src/components/barberalia/DemoSection.tsx`** — substituir os dois `<elevenlabs-convai>` por `<iframe src="https://elevenlabs.io/app/talk-to?agent_id=...">`, com renderização condicional rígida (sem Fragment partilhado), `allow="microphone"` no de voz, e moldura visual coerente.
+- **`src/vite-env.d.ts`** — remover a declaração do custom element `elevenlabs-convai` (deixa de ser usada).
+- **`src/index.css`** — remover as regras `elevenlabs-convai { ... }` adicionadas anteriormente.
+
+## Notas
+
+- **Allowed origins**: confirma novamente no painel ElevenLabs de cada agente que `https://*.lovable.app` está autorizado — o iframe respeita as mesmas regras CORS do widget.
+- **Sem bolhas flutuantes**: garantido — o iframe é um elemento DOM normal, não injecta nada no `body`.
+- **Tema do interior**: o conteúdo do iframe é controlado pelo ElevenLabs (não conseguimos mudar fontes/cores internas sem usar o SDK React). O que ganhamos é controlo total do **enquadramento** — borda dourada, fundo escuro, posicionamento perfeito — que era o problema principal.
+- **Sem alterações** ao Hero, Dashboard, Roadmap, Footer, Navbar ou tabs.
 
