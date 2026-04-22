@@ -75,9 +75,9 @@ function ChatDemoInner() {
   };
 
   return (
-    <div className="grid min-h-[640px] grid-cols-1 gap-px border bg-brand-line border-brand lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+    <div className="grid h-[640px] grid-cols-1 gap-px overflow-hidden border bg-brand-line border-brand lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
       {/* Chat frame */}
-      <div className="flex min-h-0 flex-col bg-dark-2">
+      <div className="flex min-h-0 flex-col overflow-hidden bg-dark-2">
         <div className="flex items-center gap-3.5 border-b border-brand bg-dark-3 px-5 py-[18px]">
           <div className="grid h-[38px] w-[38px] place-items-center rounded-full bg-gradient-to-br from-gold to-dark-4 font-serif text-xl font-semibold text-dark">
             B
