@@ -1,15 +1,86 @@
-import { Fragment, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useConversation } from "@elevenlabs/react";
 import { Icon } from "./Icon";
 import { LiveDot, SectionHeading } from "./Shared";
 
 const TEXT_AGENT_ID = "agent_2401kprqge5vfjstncfjqzczmncn";
 const VOICE_AGENT_ID = "agent_2701kpsk2vq6e0yas1293het2n94";
 
-const TEXT_AGENT_URL = `https://elevenlabs.io/app/talk-to?agent_id=${TEXT_AGENT_ID}`;
-const VOICE_AGENT_URL = `https://elevenlabs.io/app/talk-to?agent_id=${VOICE_AGENT_ID}`;
-
+type ChatMsg = { role: "user" | "agent"; text: string; id: string };
 
 function ChatDemo() {
+  const [messages, setMessages] = useState<ChatMsg[]>([
+    {
+      id: "seed",
+      role: "agent",
+      text: "Olá! Sou a Barberalia. Em que posso ajudar — encomendas, stock, recomendações?",
+    },
+  ]);
+  const [input, setInput] = useState("");
+  const [starting, setStarting] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const conversation = useConversation({
+    textOnly: true,
+    onMessage: (message: any) => {
+      if (message?.source === "user" && message?.message) {
+        setMessages((m) => [
+          ...m,
+          { id: crypto.randomUUID(), role: "user", text: message.message },
+        ]);
+      } else if (message?.source === "ai" && message?.message) {
+        setMessages((m) => [
+          ...m,
+          { id: crypto.randomUUID(), role: "agent", text: message.message },
+        ]);
+      }
+    },
+    onError: (err: any) => {
+      console.error("Chat error", err);
+    },
+  });
+
+  const status = conversation.status;
+  const connected = status === "connected";
+
+  const ensureConnected = useCallback(async () => {
+    if (connected || starting) return;
+    setStarting(true);
+    try {
+      await conversation.startSession({
+        agentId: TEXT_AGENT_ID,
+        connectionType: "websocket",
+      });
+    } catch (e) {
+      console.error("Failed to start chat", e);
+    } finally {
+      setStarting(false);
+    }
+  }, [conversation, connected, starting]);
+
+  useEffect(() => {
+    return () => {
+      conversation.endSession().catch(() => {});
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [messages]);
+
+  const send = async () => {
+    const text = input.trim();
+    if (!text) return;
+    setInput("");
+    await ensureConnected();
+    try {
+      conversation.sendUserMessage(text);
+    } catch (e) {
+      console.error("send failed", e);
+    }
+  };
+
   return (
     <div className="grid min-h-[640px] grid-cols-1 gap-px border bg-brand-line border-brand lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
       {/* Chat frame */}
@@ -21,29 +92,70 @@ function ChatDemo() {
           <div className="flex-1">
             <div className="text-sm text-ink">Barberalia Atendimento</div>
             <div className="mt-0.5 flex items-center gap-2 font-mono text-[10px] tracking-[0.1em] text-ink-muted">
-              <LiveDot /> Online · responde em segundos
+              <LiveDot /> {connected ? "Online · agente real" : starting ? "A ligar…" : "Pronto · escreve para começar"}
             </div>
           </div>
           <div className="font-mono text-[10px] text-ink-dim">#demo</div>
         </div>
 
         <div
-          className="relative flex min-h-[600px] w-full flex-1 flex-col bg-dark-2 p-4"
+          ref={scrollRef}
+          className="relative flex min-h-[480px] w-full flex-1 flex-col gap-3 overflow-y-auto p-5"
           style={{
             background:
               "radial-gradient(circle at 20% 10%, hsl(var(--gold) / 0.04), transparent 40%), hsl(var(--dark-2))",
           }}
         >
-          <iframe
-            src={TEXT_AGENT_URL}
-            title="Barberalia · Chat"
-            className="h-full min-h-[560px] w-full flex-1 rounded border border-brand bg-dark-3"
-            allow="clipboard-write"
-          />
-          <div className="pointer-events-none mt-3 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-ink-dim">
-            Agente real · ElevenLabs · texto
-          </div>
+          {messages.map((m) => (
+            <div
+              key={m.id}
+              className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+            >
+              <div
+                className={`max-w-[78%] rounded-lg px-4 py-2.5 text-[13px] leading-relaxed ${
+                  m.role === "user"
+                    ? "bg-gold/15 text-ink border border-gold/30"
+                    : "bg-dark-3 text-ink border border-brand"
+                }`}
+              >
+                {m.text}
+              </div>
+            </div>
+          ))}
+          {connected && conversation.isSpeaking && (
+            <div className="flex justify-start">
+              <div className="rounded-lg border border-brand bg-dark-3 px-4 py-2.5 text-[13px] text-ink-muted">
+                <span className="inline-flex gap-1">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold" />
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold [animation-delay:150ms]" />
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold [animation-delay:300ms]" />
+                </span>
+              </div>
+            </div>
+          )}
         </div>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            send();
+          }}
+          className="flex items-center gap-2 border-t border-brand bg-dark-3 px-4 py-3"
+        >
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Escreve uma mensagem…"
+            className="flex-1 bg-transparent text-[13px] text-ink placeholder:text-ink-dim outline-none"
+          />
+          <button
+            type="submit"
+            disabled={!input.trim()}
+            className="rounded-sm border border-gold/40 bg-gold/10 px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-gold-light transition hover:bg-gold/20 disabled:opacity-40"
+          >
+            Enviar
+          </button>
+        </form>
       </div>
 
       {/* Side panel */}
@@ -75,6 +187,48 @@ function ChatDemo() {
 }
 
 function VoiceDemo() {
+  const [starting, setStarting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const conversation = useConversation({
+    onError: (err: any) => {
+      console.error("Voice error", err);
+      setError("Não foi possível ligar. Verifica permissões do microfone.");
+    },
+  });
+
+  const status = conversation.status;
+  const connected = status === "connected";
+  const speaking = conversation.isSpeaking;
+
+  const start = useCallback(async () => {
+    setError(null);
+    setStarting(true);
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      await conversation.startSession({
+        agentId: VOICE_AGENT_ID,
+        connectionType: "webrtc",
+      });
+    } catch (e: any) {
+      console.error(e);
+      setError(e?.message ?? "Falha ao iniciar conversa.");
+    } finally {
+      setStarting(false);
+    }
+  }, [conversation]);
+
+  const stop = useCallback(async () => {
+    await conversation.endSession();
+  }, [conversation]);
+
+  useEffect(() => {
+    return () => {
+      conversation.endSession().catch(() => {});
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="border border-brand bg-dark-2 p-10 md:p-14">
       <div className="grid grid-cols-1 items-center gap-14 lg:grid-cols-[1fr_1.1fr]">
@@ -98,26 +252,74 @@ function VoiceDemo() {
             ))}
           </ul>
           <p className="mt-2.5 font-mono text-[9px] uppercase tracking-[0.18em] text-ink-dim">
-            Clica no widget e fala directamente com o assistente
+            Clica em iniciar e fala directamente com o assistente
           </p>
         </div>
         <div>
           <div
-            className="relative flex min-h-[560px] w-full flex-col rounded border border-brand-bright p-4"
+            className="relative flex min-h-[420px] w-full flex-col items-center justify-center gap-8 rounded border border-brand-bright p-10"
             style={{
               background:
                 "radial-gradient(circle at 50% 0%, hsl(var(--gold) / 0.08), transparent 60%), hsl(var(--dark-2))",
             }}
           >
-            <iframe
-              src={VOICE_AGENT_URL}
-              title="Barberalia · Voz"
-              className="h-full min-h-[500px] w-full flex-1 rounded border border-brand bg-dark-3"
-              allow="microphone; autoplay; clipboard-write"
-            />
-            <div className="mt-4 text-center font-mono text-[10px] uppercase tracking-[0.15em] text-ink-dim">
-              Agente real · ElevenLabs · voz
+            {/* Orb */}
+            <div className="relative flex h-44 w-44 items-center justify-center">
+              <div
+                className={`absolute inset-0 rounded-full bg-gradient-to-br from-gold to-dark-4 transition-all duration-500 ${
+                  connected ? "opacity-100" : "opacity-50"
+                } ${speaking ? "scale-110 blur-[2px]" : "scale-100"}`}
+                style={{
+                  boxShadow: connected
+                    ? "0 0 60px hsl(var(--gold) / 0.4), 0 0 120px hsl(var(--gold) / 0.2)"
+                    : "0 0 30px hsl(var(--gold) / 0.15)",
+                }}
+              />
+              {connected && (
+                <>
+                  <div className="absolute inset-0 animate-ping rounded-full border border-gold/30" style={{ animationDuration: "2.5s" }} />
+                  <div className="absolute -inset-4 animate-ping rounded-full border border-gold/20" style={{ animationDuration: "3.5s" }} />
+                </>
+              )}
+              <div className="relative font-mono text-[10px] uppercase tracking-[0.2em] text-dark">
+                {speaking ? "A falar" : connected ? "A ouvir" : "Standby"}
+              </div>
             </div>
+
+            {/* Status */}
+            <div className="text-center">
+              <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-dim">
+                {starting
+                  ? "A ligar…"
+                  : connected
+                  ? speaking
+                    ? "Agente a responder"
+                    : "À tua espera"
+                  : "Pronto para conversar"}
+              </div>
+              {error && (
+                <div className="mt-2 font-mono text-[10px] text-brand-red-light">{error}</div>
+              )}
+            </div>
+
+            {/* Controls */}
+            {!connected ? (
+              <button
+                onClick={start}
+                disabled={starting}
+                className="inline-flex items-center gap-2.5 rounded-sm border border-gold bg-gold/10 px-7 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-gold-light transition hover:bg-gold/20 disabled:opacity-50"
+              >
+                <Icon name="mic" size={14} />
+                {starting ? "A ligar…" : "Iniciar conversa"}
+              </button>
+            ) : (
+              <button
+                onClick={stop}
+                className="inline-flex items-center gap-2.5 rounded-sm border border-brand-red-light/50 bg-brand-red/20 px-7 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-brand-red-light transition hover:bg-brand-red/30"
+              >
+                Terminar
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -160,11 +362,9 @@ export function DemoSection() {
         </div>
 
         <div className="reveal" data-delay="300">
-          <Fragment key={tab}>
-            <div className="[animation:demo-fade_0.3s_ease]">
-              {tab === "chat" ? <ChatDemo /> : <VoiceDemo />}
-            </div>
-          </Fragment>
+          <div key={tab} className="[animation:demo-fade_0.3s_ease]">
+            {tab === "chat" ? <ChatDemo /> : <VoiceDemo />}
+          </div>
         </div>
       </div>
     </section>
