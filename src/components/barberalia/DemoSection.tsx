@@ -67,6 +67,10 @@ function ChatDemoInner() {
     const text = input.trim();
     if (!text) return;
     setInput("");
+    setMessages((m) => [
+      ...m,
+      { id: crypto.randomUUID(), role: "user", text },
+    ]);
     await ensureConnected();
     try {
       conversation.sendUserMessage(text);
