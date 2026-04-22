@@ -14,7 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      conversas: {
+        Row: {
+          agent_id: string | null
+          budget: string | null
+          conversation_id: string
+          created_at: string
+          customer_type: string | null
+          duration_secs: number | null
+          id: string
+          intent: string | null
+          order_number: string | null
+          outcome: string | null
+          product_name: string | null
+          raw: Json | null
+          ready_to_buy: boolean | null
+          satisfaction: string | null
+          start_time_unix_secs: number | null
+          summary: string | null
+          topic_area: string | null
+          transcript: Json | null
+        }
+        Insert: {
+          agent_id?: string | null
+          budget?: string | null
+          conversation_id: string
+          created_at?: string
+          customer_type?: string | null
+          duration_secs?: number | null
+          id?: string
+          intent?: string | null
+          order_number?: string | null
+          outcome?: string | null
+          product_name?: string | null
+          raw?: Json | null
+          ready_to_buy?: boolean | null
+          satisfaction?: string | null
+          start_time_unix_secs?: number | null
+          summary?: string | null
+          topic_area?: string | null
+          transcript?: Json | null
+        }
+        Update: {
+          agent_id?: string | null
+          budget?: string | null
+          conversation_id?: string
+          created_at?: string
+          customer_type?: string | null
+          duration_secs?: number | null
+          id?: string
+          intent?: string | null
+          order_number?: string | null
+          outcome?: string | null
+          product_name?: string | null
+          raw?: Json | null
+          ready_to_buy?: boolean | null
+          satisfaction?: string | null
+          start_time_unix_secs?: number | null
+          summary?: string | null
+          topic_area?: string | null
+          transcript?: Json | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
