@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useConversation } from "@elevenlabs/react";
+import { useConversation, ConversationProvider } from "@elevenlabs/react";
 import { Icon } from "./Icon";
 import { LiveDot, SectionHeading } from "./Shared";
 
@@ -8,7 +8,7 @@ const VOICE_AGENT_ID = "agent_2701kpsk2vq6e0yas1293het2n94";
 
 type ChatMsg = { role: "user" | "agent"; text: string; id: string };
 
-function ChatDemo() {
+function ChatDemoInner() {
   const [messages, setMessages] = useState<ChatMsg[]>([
     {
       id: "seed",
@@ -186,7 +186,7 @@ function ChatDemo() {
   );
 }
 
-function VoiceDemo() {
+function VoiceDemoInner() {
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -324,6 +324,22 @@ function VoiceDemo() {
         </div>
       </div>
     </div>
+  );
+}
+
+function ChatDemo() {
+  return (
+    <ConversationProvider textOnly>
+      <ChatDemoInner />
+    </ConversationProvider>
+  );
+}
+
+function VoiceDemo() {
+  return (
+    <ConversationProvider>
+      <VoiceDemoInner />
+    </ConversationProvider>
   );
 }
 
