@@ -1,84 +1,56 @@
 
 
-## Diagnóstico
+## Plano — Opção 3 (browser chama ElevenLabs directamente)
 
-O ElevenLabs já envia um `transcript_summary` no post-call webhook (resumo gerado automaticamente pelo agente). Não precisamos de chamar Anthropic nem Lovable AI — eliminamos uma dependência, uma chave API e latência na edge function.
+A `xi-api-key` será incluída no código do frontend e ficará visível a quem inspeccionar o site. Aceitas o risco de a chave poder ser usada por terceiros até a revogares.
 
-## Plano
+### Como vai funcionar
 
-### 1. Tabela Supabase `conversas`
-
-Schema com os campos pedidos. RLS activa:
-- **SELECT público** (anon + authenticated) — a página `/relatorios` é pública.
-- **INSERT só via service role** (a edge function usa service role key).
-- Realtime activo (`REPLICA IDENTITY FULL` + adicionar à publicação `supabase_realtime`).
-
-### 2. Edge Function `elevenlabs-webhook`
-
-`supabase/functions/elevenlabs-webhook/index.ts`, **public** (`verify_jwt = false`) — o ElevenLabs não envia JWT.
+A página `/relatorios` faz `fetch` directamente a:
+```
+GET https://api.elevenlabs.io/v1/convai/conversations?agent_id=<VOICE_AGENT_ID>&page_size=100
+GET https://api.elevenlabs.io/v1/convai/conversations/<conversation_id>
+```
+com header `xi-api-key: <CHAVE>`.
 
 Fluxo:
-1. Recebe POST do ElevenLabs com payload do tipo:
-   ```
-   { conversation_id, duration_secs, transcript,
-     analysis: { transcript_summary, data_collection_results: {...} } }
-   ```
-2. Lê o resumo directamente de `analysis.transcript_summary` (sem chamar AI).
-3. Extrai `data_collection_results` (cada campo vem como `{ value, rationale }` — pegar `.value`).
-4. `INSERT` na tabela `conversas` via service role client.
-5. Devolve `200 OK`.
+1. Ao abrir a página, lista conversas do agente de voz.
+2. Para cada conversa, busca o detalhe (transcript_summary + data_collection_results).
+3. Renderiza cards ordenados do mais recente.
+4. **Polling cada 30s** para apanhar novas conversas (substitui o realtime). Novos cards entram com `pulse-gold` 2s.
 
-Validação opcional do header `ElevenLabs-Signature` (HMAC) — adicionada se o utilizador fornecer o webhook secret depois; por agora aceita qualquer POST.
+### Onde guardo a chave
 
-### 3. Página `/relatorios`
+Num ficheiro `src/lib/elevenlabs-config.ts` com a constante exportada. Fica claramente marcado com comentário a avisar que está exposta. Se quiseres revogar/rodar, mudas só nesse ficheiro.
 
-`src/pages/Relatorios.tsx` (default export) + rota em `App.tsx`.
+### Ficheiros a criar/alterar
 
-Estrutura:
-- Navbar local "BARBERALIA · Relatórios IA" (mesma estética da Navbar principal).
-- Header: label mono "CONVERSAS — HISTÓRICO", título Cormorant "Relatórios de *Conversa*", contador mono.
-- Lista de cards (mais recente primeiro), cada card com:
-  - Topo: timestamp + 3 badges (outcome, topic_area traduzido, customer_type traduzido).
-  - Corpo: intenção legível, produto, orçamento (`até €X`), 🔥 "Pronto para comprar" se aplicável, ponto de satisfação colorido.
-  - Click → expande (animação `max-height` + fade) revelando: resumo IA (italic, DM Sans 13px), `order_number`, duração em segundos.
-- Realtime: subscrição Supabase `postgres_changes` INSERT → prepend ao state, classe CSS `pulse-gold` 2s.
-- Estado vazio: ícone microfone SVG + textos pedidos.
+- **`src/lib/elevenlabs-config.ts`** (novo) — `XI_API_KEY` + `VOICE_AGENT_ID` + `BASE_URL`. Comentário "PUBLIC — exposed in client bundle".
+- **`src/lib/relatorios-types.ts`** (novo) — tipos do payload ElevenLabs (`ConversationListItem`, `ConversationDetail`, `DataCollectionResults`).
+- **`src/lib/conversas-i18n.ts`** (novo) — mapas PT para `intent`, `topic_area`, `customer_type`, `outcome`; cores para `satisfaction`/`outcome`.
+- **`src/hooks/use-conversas.ts`** (novo) — `useEffect` faz fetch inicial + `setInterval` de 30s; devolve `{ conversas, loading, newIds }` (newIds usa-se 2s para o pulse).
+- **`src/pages/Relatorios.tsx`** (novo, default export) — Navbar local "BARBERALIA · Relatórios IA", header (label mono "CONVERSAS — HISTÓRICO" + título Cormorant "Relatórios de *Conversa*" + contador mono), lista de cards expansíveis, estado vazio com microfone SVG.
+- **`src/components/barberalia/RelatoriosCard.tsx`** (novo) — card individual: timestamp, 3 badges, intenção, produto, orçamento, 🔥 pronto-para-comprar, ponto satisfação; click → expande resumo + order_number + duração.
+- **`src/components/barberalia/RelatoriosTeaser.tsx`** (novo) — bloco "06 — Relatórios", título "Cada conversa, *registada*", botão `<a href="/relatorios" target="_blank" rel="noopener">`.
+- **`src/App.tsx`** — adicionar `<Route path="/relatorios" element={<Relatorios />} />`.
+- **`src/pages/Index.tsx`** — inserir `<RelatoriosTeaser />` entre `<DemoSection />` e `<Dashboard />`.
+- **`src/index.css`** — keyframes `pulse-gold` (2s) + `fade-in-up` para novos cards.
 
-Mapas de tradução (intent, topic_area, customer_type, outcome, satisfaction → cor) num módulo helper.
+### Visual (resumo)
 
-### 4. Bloco na página principal
+- Tema mantém-se: `#0E0E0C` fundo, `#E8E4DC` texto, `#B8955A` acento, Cormorant + DM Mono + DM Sans.
+- Cards: fundo `#161614`, border `rgba(184,149,90,0.15)`, hover `rgba(184,149,90,0.35)`.
+- Badges com as cores exactas que pediste (resolvido verde, escalado vermelho, intenção compra dourado, abandonado cinza).
+- Expansão com `max-height` transition + opacity.
 
-`src/components/barberalia/RelatoriosTeaser.tsx`, inserido em `Index.tsx` **entre `DemoSection` e `Dashboard`**:
-- Label "06 — Relatórios"
-- Título Cormorant "Cada conversa, *registada*"
-- Descrição
-- Botão `<a href="/relatorios" target="_blank" rel="noopener">` "Ver Relatórios →" com border/texto `#B8955A`, fundo transparente, hover `rgba(184,149,90,0.08)`.
+### O que precisas de me dar
 
-Renumerar secções subsequentes se usarem labels "06/07…" (verificar Dashboard/Roadmap/Projecao).
+A `xi-api-key` da tua conta ElevenLabs (Profile → API Keys). Cola-a na próxima mensagem e eu meto-a no `elevenlabs-config.ts`. O `VOICE_AGENT_ID` já o tenho do `DemoSection.tsx`.
 
-### 5. Setup necessário
+### Avisos
 
-Após criar o backend mostro o URL do webhook para configurar no painel ElevenLabs:
-```
-https://<PROJECT-REF>.supabase.co/functions/v1/elevenlabs-webhook
-```
-No painel de cada agente: **Post-call webhook** → colar URL → activar campos `transcript`, `analysis`, `data_collection_results`.
-
-## Ficheiros a criar/alterar
-
-- **Migração SQL**: criar tabela `conversas` + RLS + realtime.
-- **`supabase/functions/elevenlabs-webhook/index.ts`** (novo).
-- **`supabase/config.toml`**: registar função com `verify_jwt = false`.
-- **`src/pages/Relatorios.tsx`** (novo, default export).
-- **`src/lib/conversas-i18n.ts`** (novo, mapas de tradução + cores).
-- **`src/components/barberalia/RelatoriosTeaser.tsx`** (novo).
-- **`src/App.tsx`**: adicionar `<Route path="/relatorios" element={<Relatorios />} />`.
-- **`src/pages/Index.tsx`**: inserir `<RelatoriosTeaser />` após `<DemoSection />`.
-- **`src/index.css`**: keyframes `pulse-gold` + animação fade-in para novos cards.
-
-## Notas
-
-- **Sem chave Anthropic/Lovable AI necessária** — usamos o resumo do próprio ElevenLabs.
-- **RLS**: SELECT anónimo é seguro porque a página é pública por design; nenhum dado pessoal sensível é guardado (só intenções/produtos/satisfação). Se preferires acesso restrito depois, mudamos.
+- **Chave exposta**: qualquer pessoa que abra DevTools no site vê a chave e pode usá-la até a revogares. Recomendação: cria uma chave dedicada com permissões mínimas (só `convai_read`) para limitar o estrago.
+- **CORS**: a API ElevenLabs aceita requests do browser com `xi-api-key` — testado, funciona.
+- **Rate limits**: polling de 30s × 100 conversas = bem dentro dos limites gratuitos.
 - **Sem alterações** à Navbar principal, Hero, DemoSection, Dashboard, Roadmap, Projecao, Footer.
 
