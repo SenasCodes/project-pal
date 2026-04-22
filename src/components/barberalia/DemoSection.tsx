@@ -17,12 +17,7 @@ function ChatDemoInner() {
   const conversation = useConversation({
     textOnly: true,
     onMessage: (message: any) => {
-      if (message?.source === "user" && message?.message) {
-        setMessages((m) => [
-          ...m,
-          { id: crypto.randomUUID(), role: "user", text: message.message },
-        ]);
-      } else if (message?.source === "ai" && message?.message) {
+      if (message?.source === "ai" && message?.message) {
         setMessages((m) => [
           ...m,
           { id: crypto.randomUUID(), role: "agent", text: message.message },
