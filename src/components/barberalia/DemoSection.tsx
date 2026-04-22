@@ -25,14 +25,27 @@ function ChatDemo() {
         </div>
 
         <div
-          className="relative flex min-h-[560px] flex-1 flex-col items-center justify-center bg-dark-2 p-6"
+          className="relative flex min-h-[600px] w-full flex-1 flex-col bg-dark-2 p-4"
           style={{
             background:
               "radial-gradient(circle at 20% 10%, hsl(var(--gold) / 0.04), transparent 40%), hsl(var(--dark-2))",
           }}
         >
-          <elevenlabs-convai agent-id={TEXT_AGENT_ID}></elevenlabs-convai>
-          <div className="pointer-events-none mt-4 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-dim">
+          <div className="flex-1 w-full">
+            <elevenlabs-convai
+              agent-id={TEXT_AGENT_ID}
+              variant="expanded"
+              avatar-orb-color-1="#B8955A"
+              avatar-orb-color-2="#D4B483"
+              action-text="Falar com a Barberalia"
+              start-call-text="Iniciar conversa"
+              end-call-text="Terminar"
+              listening-text="A ouvir…"
+              speaking-text="A responder…"
+              expand-text="Abrir chat"
+            ></elevenlabs-convai>
+          </div>
+          <div className="pointer-events-none mt-3 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-ink-dim">
             Agente real · ElevenLabs · texto
           </div>
         </div>
