@@ -19,12 +19,12 @@ const KPIS = [
 ];
 
 const CONVS: Conv[] = [
-  { name: "João Silva", ch: "chat", msg: "Onde está a encomenda #BC-2025-0312?", time: "14:32", status: "curso", color: "#B8955A" },
-  { name: "Maria Ferreira", ch: "mic", msg: "Quero devolver a máquina Andis", time: "14:15", status: "escalado", color: "#C0504D" },
-  { name: "Carlos Mendes", ch: "chat", msg: "Têm lâminas Feather em stock?", time: "13:58", status: "resolvido", color: "#4D9A72" },
-  { name: "Ana Costa", ch: "chat", msg: "Qual o prazo de entrega para Braga?", time: "13:41", status: "resolvido", color: "#6B8CAE" },
+  { name: "João Silva", ch: "chat", msg: "Onde está a encomenda #FP-2025-0312?", time: "14:32", status: "curso", color: "#E8631A" },
+  { name: "Maria Ferreira", ch: "mic", msg: "Quero devolver a resistência Bosch", time: "14:15", status: "escalado", color: "#C0504D" },
+  { name: "Carlos Mendes", ch: "chat", msg: "Têm filtros Rowenta RO6885 em stock?", time: "13:58", status: "resolvido", color: "#4D9A72" },
+  { name: "Ana Costa", ch: "chat", msg: "Qual o prazo de entrega para Braga?", time: "13:41", status: "resolvido", color: "#3B82F6" },
   { name: "Pedro Rodrigues", ch: "mic", msg: "Preciso de fatura da encomenda de março", time: "13:20", status: "aguarda", color: "#8A8578" },
-  { name: "Barbershop Norte", ch: "chat", msg: "Condições para conta profissional?", time: "12:55", status: "resolvido", color: "#D4B483" },
+  { name: "Assistência Norte", ch: "chat", msg: "Condições para conta de assistência técnica?", time: "12:55", status: "resolvido", color: "#F4904A" },
 ];
 
 const STATUS_MAP: Record<Conv["status"], { label: string; tone: "green" | "red" | "gold" | "muted" }> = {
