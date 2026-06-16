@@ -59,10 +59,10 @@ export function Projecao() {
 
         <div className="reveal mb-8" data-delay="300">
           <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.28em] text-gold">
-            BARBERALIA — PROJEÇÃO A 12 MESES
+            FRIPARQUE — PROJEÇÃO A 12 MESES
           </div>
           <p className="m-0 max-w-[64ch] text-sm text-ink-muted">
-            Baseada em faturação actual de ~€400k/ano e volume estimado de 100 contactos WhatsApp + 50 chamadas/dia.
+            Baseada num catálogo com milhares de referências de peças e acessórios e um volume estimado de 100+ contactos WhatsApp e 50+ chamadas por dia.
           </p>
         </div>
 
