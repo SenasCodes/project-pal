@@ -6,10 +6,10 @@ export function Footer() {
       <div className="mx-auto flex max-w-[1200px] flex-wrap items-end justify-between gap-8 px-8">
         <div>
           <div className="mb-1.5 font-serif text-[28px] font-light -tracking-[0.01em] text-ink">
-            Barberalia <em>· Sistema IA</em>
+            Friparque <em>· Sistema IA</em>
           </div>
           <div className="font-mono text-ink-dim">
-            barberalia.com · Albufeira, Faro · Portugal
+            friparque.pt · Peças e acessórios de eletrodomésticos · Portugal
           </div>
         </div>
         <div className="flex flex-col items-end gap-2.5 text-right">
