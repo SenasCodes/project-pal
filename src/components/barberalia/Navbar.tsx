@@ -34,7 +34,7 @@ export function Navbar() {
       <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-8 px-8 py-[18px]">
         <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.2em]">
           <LiveDot />
-          <span className="font-normal text-ink">BARBERALIA</span>
+          <span className="font-normal text-ink">FRIPARQUE</span>
           <span className="mx-0.5 text-ink-dim">·</span>
           <span className="hidden text-ink-muted normal-case tracking-[0.08em] sm:inline">
             Sistema IA · Activo

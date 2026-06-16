@@ -19,12 +19,12 @@ const KPIS = [
 ];
 
 const CONVS: Conv[] = [
-  { name: "João Silva", ch: "chat", msg: "Onde está a encomenda #BC-2025-0312?", time: "14:32", status: "curso", color: "#B8955A" },
-  { name: "Maria Ferreira", ch: "mic", msg: "Quero devolver a máquina Andis", time: "14:15", status: "escalado", color: "#C0504D" },
-  { name: "Carlos Mendes", ch: "chat", msg: "Têm lâminas Feather em stock?", time: "13:58", status: "resolvido", color: "#4D9A72" },
-  { name: "Ana Costa", ch: "chat", msg: "Qual o prazo de entrega para Braga?", time: "13:41", status: "resolvido", color: "#6B8CAE" },
+  { name: "João Silva", ch: "chat", msg: "Onde está a encomenda #FP-2025-0312?", time: "14:32", status: "curso", color: "#E8631A" },
+  { name: "Maria Ferreira", ch: "mic", msg: "Quero devolver a resistência Bosch", time: "14:15", status: "escalado", color: "#C0504D" },
+  { name: "Carlos Mendes", ch: "chat", msg: "Têm filtros Rowenta RO6885 em stock?", time: "13:58", status: "resolvido", color: "#4D9A72" },
+  { name: "Ana Costa", ch: "chat", msg: "Qual o prazo de entrega para Braga?", time: "13:41", status: "resolvido", color: "#3B82F6" },
   { name: "Pedro Rodrigues", ch: "mic", msg: "Preciso de fatura da encomenda de março", time: "13:20", status: "aguarda", color: "#8A8578" },
-  { name: "Barbershop Norte", ch: "chat", msg: "Condições para conta profissional?", time: "12:55", status: "resolvido", color: "#D4B483" },
+  { name: "Assistência Norte", ch: "chat", msg: "Condições para conta de assistência técnica?", time: "12:55", status: "resolvido", color: "#F4904A" },
 ];
 
 const STATUS_MAP: Record<Conv["status"], { label: string; tone: "green" | "red" | "gold" | "muted" }> = {
@@ -86,8 +86,8 @@ function KpiDetail({ id, onResolveEscalation }: { id: string; onResolveEscalatio
   }
   if (id === "esc") {
     const items = CONVS.filter((c) => c.status === "escalado").concat([
-      { name: "Rui Tavares", ch: "chat", msg: "Produto chegou danificado — reclamação", time: "14:02", status: "escalado", color: "#C0504D" },
-      { name: "Sofia Lopes", ch: "mic", msg: "Problema com pagamento recorrente", time: "13:48", status: "escalado", color: "#C0504D" },
+      { name: "Rui Tavares", ch: "chat", msg: "Peça chegou partida — reclamação", time: "14:02", status: "escalado", color: "#C0504D" },
+      { name: "Sofia Lopes", ch: "mic", msg: "Problema com pagamento de encomenda B2B", time: "13:48", status: "escalado", color: "#C0504D" },
     ]);
     return (
       <div className="flex flex-col gap-0.5">
@@ -112,12 +112,12 @@ function KpiDetail({ id, onResolveEscalation }: { id: string; onResolveEscalatio
   }
   if (id === "ord") {
     const rows = [
-      ["#BC-2025-0312", "João Silva", "Kit Aluno + Navalha Dovo", "Em trânsito"],
-      ["#BC-2025-0311", "Maria Ferreira", "Máquina Andis Master", "Devolução"],
-      ["#BC-2025-0310", "Carlos Mendes", "Lâminas Feather (x20)", "A aguardar envio"],
-      ["#BC-2025-0309", "Ana Costa", "Pente Kent + Tesoura Jaguar", "Entregue"],
-      ["#BC-2025-0308", "Pedro Rodrigues", "Kit Profissional Completo", "Em trânsito"],
-      ["#BC-2025-0307", "Barbershop Norte", "Encomenda B2B (48 items)", "A aguardar envio"],
+      ["#FP-2025-0312", "João Silva", "Resistência forno Bosch HBA13B150E", "Em trânsito"],
+      ["#FP-2025-0311", "Maria Ferreira", "Filtro HEPA Rowenta RO6885", "Devolução"],
+      ["#FP-2025-0310", "Carlos Mendes", "Junta tampa máquina Whirlpool", "A aguardar envio"],
+      ["#FP-2025-0309", "Ana Costa", "Termostato esquentador Vulcano", "Entregue"],
+      ["#FP-2025-0308", "Pedro Rodrigues", "Kit escovas aspirador Moulinex", "Em trânsito"],
+      ["#FP-2025-0307", "Assistência Norte", "Encomenda B2B (32 referências)", "A aguardar envio"],
     ];
     return (
       <table className="w-full border-collapse text-[12px]">
@@ -144,7 +144,7 @@ function KpiDetail({ id, onResolveEscalation }: { id: string; onResolveEscalatio
     );
   }
   if (id === "res") {
-    const bars: [string, number][] = [["Pré-venda", 94], ["Pós-venda", 82], ["Devoluções", 71]];
+    const bars: [string, number][] = [["Procura de peça", 94], ["Pós-venda · tracking", 82], ["Devoluções", 71]];
     return (
       <div className="flex flex-col gap-5">
         {bars.map(([l, v]) => (
@@ -173,9 +173,9 @@ function KpiDetail({ id, onResolveEscalation }: { id: string; onResolveEscalatio
 function ConversationDetail({ conv }: { conv: Conv }) {
   const tline: { who: "c" | "a"; t: string; text: string }[] = [
     { who: "c", t: conv.time, text: conv.msg },
-    { who: "a", t: conv.time, text: "Claro, estou a verificar a sua questão — um momento." },
+    { who: "a", t: conv.time, text: "Claro, estou a verificar — um momento." },
     { who: "c", t: conv.time, text: "Obrigado, aguardo." },
-    { who: "a", t: conv.time, text: "Encontrei a informação. A sua encomenda está em rota via Nacex, tracking NX20250402PT3120." },
+    { who: "a", t: conv.time, text: "Encontrei a referência. A peça está em stock e a sua encomenda segue via CTT Expresso, tracking RR20250402PT3120." },
   ];
   return (
     <>

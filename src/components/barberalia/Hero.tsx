@@ -74,7 +74,7 @@ export function Hero() {
           className="m-0 mb-7 font-serif text-[clamp(56px,8.6vw,128px)] font-light leading-[0.98] -tracking-[0.02em] text-ink opacity-0 [animation:fade-up_0.9s_ease_forwards]"
           style={{ animationDelay: "0.65s" }}
         >
-          Barberalia
+          Friparque
           <br />
           <em className="mt-1.5 block">Atendimento Automatizado</em>
         </h1>
@@ -83,7 +83,7 @@ export function Hero() {
           className="m-0 mb-14 max-w-[60ch] text-base text-ink-muted opacity-0 [animation:fade-up_0.9s_ease_forwards]"
           style={{ animationDelay: "0.9s" }}
         >
-          Assistente IA activo — WhatsApp · Voz · Dashboard em tempo real
+          IA para peças de eletrodomésticos — WhatsApp · Voz · Dashboard em tempo real
         </p>
 
         <div

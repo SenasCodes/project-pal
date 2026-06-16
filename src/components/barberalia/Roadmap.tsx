@@ -1,18 +1,18 @@
 import { SectionHeading, Tag } from "./Shared";
 
 const ROADMAP: { n: string; title: string; tag: string; tagTone: "gold" | "green" | "muted"; desc: string }[] = [
-  { n: "01", title: "Qualificação automática B2B/B2C", tag: "Alta prioridade", tagTone: "gold",
-    desc: "Identifica automaticamente se o cliente é barbeiro profissional ou consumidor final. Adapta o tom, preços e condições. Regista o tipo no sistema para seguimento personalizado e campanhas segmentadas." },
-  { n: "02", title: "Agendamento de contacto de retorno", tag: "Alta prioridade", tagTone: "gold",
-    desc: "Quando o cliente pede para ser contactado, o assistente regista automaticamente o pedido com nome, contacto e contexto. A equipa recebe notificação imediata com tudo o que precisa para a chamada." },
+  { n: "01", title: "Identificação de peça por foto", tag: "Alta prioridade", tagTone: "gold",
+    desc: "O cliente envia foto da chapa de características (marca, modelo, número de série) ou da peça partida. O sistema lê com OCR/visão IA e procura automaticamente a referência correcta no catálogo Friparque." },
+  { n: "02", title: "Recomendação de peças compatíveis", tag: "Alta prioridade", tagTone: "gold",
+    desc: "A partir de marca e modelo do eletrodoméstico, o assistente sugere todas as peças e acessórios compatíveis disponíveis — resistências, filtros, juntas, escovas — com link directo para o produto." },
   { n: "03", title: "Notificações proativas de encomenda", tag: "Rápido de implementar", tagTone: "green",
-    desc: "O sistema envia automaticamente mensagens WhatsApp quando uma encomenda é confirmada, enviada e entregue. Reduz drasticamente as dúvidas de pós-venda sem qualquer intervenção manual." },
-  { n: "04", title: "Follow-up automático pós-compra", tag: "Rápido de implementar", tagTone: "green",
-    desc: "48h após a entrega, o assistente pergunta se tudo correu bem. Se houver problema, abre automaticamente o processo de devolução. Aumenta retenção e reputação sem esforço." },
-  { n: "05", title: "Resumo diário para a equipa", tag: "Médio prazo", tagTone: "muted",
-    desc: "Todas as manhãs a equipa recebe por WhatsApp e email: contactos do dia anterior, encomendas em aberto, escaladas pendentes e métricas de atendimento. Zero esforço de reporte." },
+    desc: "Mensagens WhatsApp automáticas quando a encomenda é confirmada, expedida e entregue. Reduz drasticamente os contactos repetidos de pós-venda." },
+  { n: "04", title: "Qualificação B2B vs particular", tag: "Rápido de implementar", tagTone: "green",
+    desc: "Distingue assistência técnica/profissional de cliente particular e adapta automaticamente condições, preços e formato de fatura. Regista o tipo de cliente para campanhas segmentadas." },
+  { n: "05", title: "Integração ERP / stock em tempo real", tag: "Médio prazo", tagTone: "muted",
+    desc: "Ligação ao sistema interno da Friparque para consulta de stock, preços e prazos de entrega ao segundo. Elimina respostas desactualizadas e erros de disponibilidade." },
   { n: "06", title: "Reativação de clientes inativos", tag: "Médio prazo", tagTone: "muted",
-    desc: "O sistema identifica clientes que não compram há mais de 60 dias e envia automaticamente mensagem personalizada com produtos relevantes ao seu histórico. Aumenta recorrência sem custo de aquisição." },
+    desc: "Identifica clientes que pesquisaram peça e não compraram, ou que não voltam há mais de 90 dias, e envia mensagem personalizada com sugestões. Aumenta recorrência sem custo de aquisição." },
 ];
 
 export function Roadmap() {

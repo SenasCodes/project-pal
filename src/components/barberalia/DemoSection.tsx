@@ -42,7 +42,7 @@ function ChatDemoInner() {
       });
       try {
         conversation.sendContextualUpdate(
-          "Estás a operar em modo CHAT DE TEXTO (WhatsApp), não em chamada de voz. Podes e deves enviar URLs, links de produto/checkout e texto formatado normalmente. O utilizador vê tudo em texto."
+          "Estás a operar em modo CHAT DE TEXTO (WhatsApp) para a FRIPARQUE — loja online portuguesa de peças e acessórios de eletrodomésticos (catálogo em pecas.friparque.pt — marcas Bosch, Rowenta, Moulinex, Whirlpool, etc.). Não é uma chamada de voz: podes e deves enviar URLs do catálogo, links de produto/checkout e texto formatado. Ajuda o cliente a identificar a peça correcta (marca, modelo, referência), confirmar compatibilidade, stock e prazos."
         );
       } catch (e) {
         console.warn("contextual update failed", e);
@@ -87,10 +87,10 @@ function ChatDemoInner() {
       <div className="flex min-h-0 flex-col overflow-hidden bg-dark-2">
         <div className="flex items-center gap-3.5 border-b border-brand bg-dark-3 px-5 py-[18px]">
           <div className="grid h-[38px] w-[38px] place-items-center rounded-full bg-gradient-to-br from-gold to-dark-4 font-serif text-xl font-semibold text-dark">
-            B
+            F
           </div>
           <div className="flex-1">
-            <div className="text-sm text-ink">Barberalia Atendimento</div>
+            <div className="text-sm text-ink">Friparque Atendimento</div>
             <div className="mt-0.5 flex items-center gap-2 font-mono text-[10px] tracking-[0.1em] text-ink-muted">
               <LiveDot /> {connected ? "Online · agente real" : starting ? "A ligar…" : "Pronto · escreve para começar"}
             </div>
@@ -164,10 +164,11 @@ function ChatDemoInner() {
           DADOS EM TEMPO REAL
         </div>
         {[
-          { k: "Cliente", v: <>João M. <span className="font-mono text-ink-dim">· VIP</span></> },
-          { k: "Intenção detectada", v: <span className="font-serif text-[15px] italic text-gold-light">Pós-venda · tracking</span> },
-          { k: "Encomenda", v: <span className="font-mono text-[11px]">#BC-2025-0312</span> },
-          { k: "Estado", v: <><span className="mr-1 inline-block h-[7px] w-[7px] rounded-full bg-brand-green-light shadow-[0_0_8px_hsl(var(--brand-green-light)/0.5)]" /> Em trânsito · Nacex</> },
+          { k: "Cliente", v: <>João M. <span className="font-mono text-ink-dim">· Particular</span></> },
+          { k: "Intenção detectada", v: <span className="font-serif text-[15px] italic text-gold-light">Procura peça · resistência forno</span> },
+          { k: "Modelo", v: <span className="font-mono text-[11px]">Bosch HBA13B150E</span> },
+          { k: "Encomenda", v: <span className="font-mono text-[11px]">#FP-2025-0312</span> },
+          { k: "Estado", v: <><span className="mr-1 inline-block h-[7px] w-[7px] rounded-full bg-brand-green-light shadow-[0_0_8px_hsl(var(--brand-green-light)/0.5)]" /> Em stock · envio 24h</> },
           { k: "Escalada", v: <span className="text-ink-muted">Não necessária</span> },
         ].map((row, i) => (
           <div key={i} className="flex items-baseline justify-between gap-3 border-b border-dashed border-brand pb-3.5">
@@ -178,8 +179,8 @@ function ChatDemoInner() {
           </div>
         ))}
         <div className="mt-auto border-t border-brand pt-[18px] font-mono text-[10px] leading-[1.7] tracking-wider text-ink-dim">
-          Respostas geradas a partir da base de conhecimento Barberalia — stock,
-          encomendas, políticas e FAQ indexados.
+          Respostas geradas a partir do catálogo Friparque — peças, compatibilidades,
+          encomendas e políticas de devolução indexados.
         </div>
       </aside>
     </div>

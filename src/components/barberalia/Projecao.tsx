@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { SectionHeading } from "./Shared";
 
 const REFS = [
-  { big: "+34%", label: "Aumento de conversão pós-venda", desc: "Empresas com atendimento automatizado 24/7 em WhatsApp registam em média +34% de conversão em clientes que recebem resposta imediata fora do horário comercial, vs esperar até ao próximo dia útil.", source: "Tidio E-commerce AI Report 2024", sub: "E-commerce Especializado" },
-  { big: "−62%", label: "Redução de contactos repetidos", desc: "Distribuidores B2B que implementaram assistentes IA para tracking de encomendas e FAQ de pós-venda reduziram em 62% os contactos repetidos para a mesma questão, libertando a equipa para vendas.", source: "Salesforce State of Service 2024", sub: "Retalho B2B com chatbot" },
-  { big: "+28%", label: "Aumento de ticket médio", desc: "Empresas com assistente de voz que qualifica e recomenda produtos durante a conversa registam um aumento médio de 28% no valor do ticket, por via de upsell e recomendação contextual.", source: "McKinsey AI in Retail 2023", sub: "Voz + WhatsApp combinados" },
+  { big: "+34%", label: "Aumento de conversão pós-venda", desc: "Lojas online de peças e componentes com atendimento automatizado 24/7 em WhatsApp registam em média +34% de conversão entre clientes que recebem resposta imediata fora do horário comercial.", source: "Tidio E-commerce AI Report 2024", sub: "E-commerce Especializado" },
+  { big: "−62%", label: "Redução de contactos repetidos", desc: "Distribuidores B2B/B2C que implementaram assistentes IA para tracking, compatibilidade de peças e FAQ reduziram em 62% os contactos repetidos para a mesma questão, libertando a equipa para vendas e assistência.", source: "Salesforce State of Service 2024", sub: "Retalho de peças com chatbot" },
+  { big: "+28%", label: "Aumento de ticket médio", desc: "Lojas com assistente que sugere peças e acessórios compatíveis durante a conversa registam um aumento médio de 28% no valor do ticket, por via de upsell contextual (filtros, kits, consumíveis).", source: "McKinsey AI in Retail 2023", sub: "Voz + WhatsApp combinados" },
 ];
 
 const PROJ = [
@@ -34,7 +34,7 @@ export function Projecao() {
           num="05"
           label="Projeção"
           title={<>Impacto <em>esperado</em> nas vendas</>}
-          desc="Com base em implementações comparáveis em e-commerce B2B e retalho especializado, estas são as melhorias esperadas para a Barberalia."
+          desc="Com base em implementações comparáveis em e-commerce de peças e retalho técnico especializado, estas são as melhorias esperadas para a Friparque."
         />
 
         <div className="reveal mb-20 grid grid-cols-1 gap-px border bg-brand-line border-brand md:grid-cols-2 lg:grid-cols-3" data-delay="220">
@@ -59,10 +59,10 @@ export function Projecao() {
 
         <div className="reveal mb-8" data-delay="300">
           <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.28em] text-gold">
-            BARBERALIA — PROJEÇÃO A 12 MESES
+            FRIPARQUE — PROJEÇÃO A 12 MESES
           </div>
           <p className="m-0 max-w-[64ch] text-sm text-ink-muted">
-            Baseada em faturação actual de ~€400k/ano e volume estimado de 100 contactos WhatsApp + 50 chamadas/dia.
+            Baseada num catálogo com milhares de referências de peças e acessórios e um volume estimado de 100+ contactos WhatsApp e 50+ chamadas por dia.
           </p>
         </div>
 
