@@ -112,12 +112,12 @@ function KpiDetail({ id, onResolveEscalation }: { id: string; onResolveEscalatio
   }
   if (id === "ord") {
     const rows = [
-      ["#BC-2025-0312", "João Silva", "Kit Aluno + Navalha Dovo", "Em trânsito"],
-      ["#BC-2025-0311", "Maria Ferreira", "Máquina Andis Master", "Devolução"],
-      ["#BC-2025-0310", "Carlos Mendes", "Lâminas Feather (x20)", "A aguardar envio"],
-      ["#BC-2025-0309", "Ana Costa", "Pente Kent + Tesoura Jaguar", "Entregue"],
-      ["#BC-2025-0308", "Pedro Rodrigues", "Kit Profissional Completo", "Em trânsito"],
-      ["#BC-2025-0307", "Barbershop Norte", "Encomenda B2B (48 items)", "A aguardar envio"],
+      ["#FP-2025-0312", "João Silva", "Resistência forno Bosch HBA13B150E", "Em trânsito"],
+      ["#FP-2025-0311", "Maria Ferreira", "Filtro HEPA Rowenta RO6885", "Devolução"],
+      ["#FP-2025-0310", "Carlos Mendes", "Junta tampa máquina Whirlpool", "A aguardar envio"],
+      ["#FP-2025-0309", "Ana Costa", "Termostato esquentador Vulcano", "Entregue"],
+      ["#FP-2025-0308", "Pedro Rodrigues", "Kit escovas aspirador Moulinex", "Em trânsito"],
+      ["#FP-2025-0307", "Assistência Norte", "Encomenda B2B (32 referências)", "A aguardar envio"],
     ];
     return (
       <table className="w-full border-collapse text-[12px]">
