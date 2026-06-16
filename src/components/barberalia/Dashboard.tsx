@@ -86,8 +86,8 @@ function KpiDetail({ id, onResolveEscalation }: { id: string; onResolveEscalatio
   }
   if (id === "esc") {
     const items = CONVS.filter((c) => c.status === "escalado").concat([
-      { name: "Rui Tavares", ch: "chat", msg: "Produto chegou danificado — reclamação", time: "14:02", status: "escalado", color: "#C0504D" },
-      { name: "Sofia Lopes", ch: "mic", msg: "Problema com pagamento recorrente", time: "13:48", status: "escalado", color: "#C0504D" },
+      { name: "Rui Tavares", ch: "chat", msg: "Peça chegou partida — reclamação", time: "14:02", status: "escalado", color: "#C0504D" },
+      { name: "Sofia Lopes", ch: "mic", msg: "Problema com pagamento de encomenda B2B", time: "13:48", status: "escalado", color: "#C0504D" },
     ]);
     return (
       <div className="flex flex-col gap-0.5">
