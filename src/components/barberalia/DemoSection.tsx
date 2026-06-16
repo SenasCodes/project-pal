@@ -42,7 +42,7 @@ function ChatDemoInner() {
       });
       try {
         conversation.sendContextualUpdate(
-          "Estás a operar em modo CHAT DE TEXTO (WhatsApp), não em chamada de voz. Podes e deves enviar URLs, links de produto/checkout e texto formatado normalmente. O utilizador vê tudo em texto."
+          "Estás a operar em modo CHAT DE TEXTO (WhatsApp) para a FRIPARQUE — loja online portuguesa de peças e acessórios de eletrodomésticos (catálogo em pecas.friparque.pt — marcas Bosch, Rowenta, Moulinex, Whirlpool, etc.). Não é uma chamada de voz: podes e deves enviar URLs do catálogo, links de produto/checkout e texto formatado. Ajuda o cliente a identificar a peça correcta (marca, modelo, referência), confirmar compatibilidade, stock e prazos."
         );
       } catch (e) {
         console.warn("contextual update failed", e);
