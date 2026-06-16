@@ -34,7 +34,7 @@ export function Projecao() {
           num="05"
           label="Projeção"
           title={<>Impacto <em>esperado</em> nas vendas</>}
-          desc="Com base em implementações comparáveis em e-commerce B2B e retalho especializado, estas são as melhorias esperadas para a Barberalia."
+          desc="Com base em implementações comparáveis em e-commerce de peças e retalho técnico especializado, estas são as melhorias esperadas para a Friparque."
         />
 
         <div className="reveal mb-20 grid grid-cols-1 gap-px border bg-brand-line border-brand md:grid-cols-2 lg:grid-cols-3" data-delay="220">
