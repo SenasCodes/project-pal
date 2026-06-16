@@ -164,10 +164,11 @@ function ChatDemoInner() {
           DADOS EM TEMPO REAL
         </div>
         {[
-          { k: "Cliente", v: <>João M. <span className="font-mono text-ink-dim">· VIP</span></> },
-          { k: "Intenção detectada", v: <span className="font-serif text-[15px] italic text-gold-light">Pós-venda · tracking</span> },
-          { k: "Encomenda", v: <span className="font-mono text-[11px]">#BC-2025-0312</span> },
-          { k: "Estado", v: <><span className="mr-1 inline-block h-[7px] w-[7px] rounded-full bg-brand-green-light shadow-[0_0_8px_hsl(var(--brand-green-light)/0.5)]" /> Em trânsito · Nacex</> },
+          { k: "Cliente", v: <>João M. <span className="font-mono text-ink-dim">· Particular</span></> },
+          { k: "Intenção detectada", v: <span className="font-serif text-[15px] italic text-gold-light">Procura peça · resistência forno</span> },
+          { k: "Modelo", v: <span className="font-mono text-[11px]">Bosch HBA13B150E</span> },
+          { k: "Encomenda", v: <span className="font-mono text-[11px]">#FP-2025-0312</span> },
+          { k: "Estado", v: <><span className="mr-1 inline-block h-[7px] w-[7px] rounded-full bg-brand-green-light shadow-[0_0_8px_hsl(var(--brand-green-light)/0.5)]" /> Em stock · envio 24h</> },
           { k: "Escalada", v: <span className="text-ink-muted">Não necessária</span> },
         ].map((row, i) => (
           <div key={i} className="flex items-baseline justify-between gap-3 border-b border-dashed border-brand pb-3.5">
@@ -178,8 +179,8 @@ function ChatDemoInner() {
           </div>
         ))}
         <div className="mt-auto border-t border-brand pt-[18px] font-mono text-[10px] leading-[1.7] tracking-wider text-ink-dim">
-          Respostas geradas a partir da base de conhecimento Barberalia — stock,
-          encomendas, políticas e FAQ indexados.
+          Respostas geradas a partir do catálogo Friparque — peças, compatibilidades,
+          encomendas e políticas de devolução indexados.
         </div>
       </aside>
     </div>
