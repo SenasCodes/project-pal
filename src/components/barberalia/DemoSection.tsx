@@ -87,10 +87,10 @@ function ChatDemoInner() {
       <div className="flex min-h-0 flex-col overflow-hidden bg-dark-2">
         <div className="flex items-center gap-3.5 border-b border-brand bg-dark-3 px-5 py-[18px]">
           <div className="grid h-[38px] w-[38px] place-items-center rounded-full bg-gradient-to-br from-gold to-dark-4 font-serif text-xl font-semibold text-dark">
-            B
+            F
           </div>
           <div className="flex-1">
-            <div className="text-sm text-ink">Barberalia Atendimento</div>
+            <div className="text-sm text-ink">Friparque Atendimento</div>
             <div className="mt-0.5 flex items-center gap-2 font-mono text-[10px] tracking-[0.1em] text-ink-muted">
               <LiveDot /> {connected ? "Online · agente real" : starting ? "A ligar…" : "Pronto · escreve para começar"}
             </div>
