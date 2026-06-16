@@ -1,72 +1,81 @@
+## Objetivo
 
+Reaproveitar o site demo atual (Barberalia · Sistema IA) e transformá-lo numa demo para a **Friparque** (peças e acessórios de eletrodomésticos — friparque.pt). Mantém-se toda a arquitetura, secções, dashboards e os agentes ElevenLabs existentes. Só muda o que é apresentação: copy, marca, paleta de cores e dados ilustrativos.
 
-## Diagnóstico
+---
 
-Pela screenshot:
-- O **widget de chat** abre como bolha branca flutuante no canto, sobreposta ao painel "Dados em tempo real" — devia estar **embebido na zona escura à esquerda** (o "ecrã" do telemóvel).
-- O **widget de voz** também aparece como bolha no canto — devia estar **dentro do cartão dourado** à direita.
-- Há **duas bolhas visíveis ao mesmo tempo** (ícone laranja + telefone) → os dois widgets estão montados em simultâneo, mesmo só um separador estar visível.
-- As cores brancas da bolha **destoam** completamente do tema dourado/escuro.
+## 1. Branding & identidade
 
-A razão técnica: `variant="expanded"` não força inline em todos os browsers/versões do widget — o widget continua a renderizar-se como floating bubble, ancorado ao `<body>`, ignorando o container pai. Além disso, ambos os `<elevenlabs-convai>` (chat e voz) ficam no DOM porque o `Fragment key={tab}` não desmonta o widget interno (é um custom element com estado próprio).
+- Nome em toda a app: **Barberalia → Friparque**
+- Tagline: **"Sistema IA · Activo"** mantém-se, mas o subtítulo passa a referir peças e eletrodomésticos.
+- Footer: morada/localização passa de "Albufeira, Faro" para a morada Friparque (Lisboa, conforme site oficial). "Powered by Waldyn" mantém-se.
+- Logótipo placeholder: o "B" dourado no header do chat passa a "F".
+- `index.html`: title, meta description, OG/Twitter tags atualizados para Friparque.
+- Favicon: pedir/gerar novo (ou manter placeholder).
 
-## Solução
+## 2. Nova paleta (azul + laranja industrial/técnico)
 
-**1. Forçar verdadeiro embed inline com `<iframe>`**
-
-Em vez do custom element `<elevenlabs-convai>` (que renderiza floating), usar o **iframe oficial do ElevenLabs**:
-```
-https://elevenlabs.io/app/talk-to?agent_id=AGENT_ID
-```
-O iframe respeita 100% as dimensões do container pai, não tem bolha flutuante, e pode ser estilizado com border/background à volta. Isto resolve definitivamente o problema visual.
-
-**2. Montar apenas o widget do separador activo**
-
-Renderização condicional dura: o `<iframe>` do chat só existe quando `tab === "chat"`, idem para voz. Sem `Fragment key`, sem ambos no DOM. Garante zero bolhas duplicadas.
-
-**3. Remover o script global do widget bubble**
-
-O `<script src="https://unpkg.com/@elevenlabs/convai-widget-embed">` no `index.html` deixa de ser necessário (já não usamos o custom element). Remover evita que ele continue a injectar bolhas no body.
-
-**4. Posicionamento e cores**
-
-- **Chat (separador WhatsApp)**: iframe ocupa 100% da zona escura à esquerda do grid, com `min-h-[640px]`. Painel "Dados em tempo real" mantém-se intocado à direita.
-- **Voz**: iframe dentro do cartão dourado à direita do grid, `min-h-[560px]`, com a mesma borda dourada e gradiente radial. Lista de features mantém-se à esquerda.
-- Borda dourada (`border-brand`) + fundo `dark-2` à volta do iframe → moldura coerente com o resto da página.
-- Adicionar `allow="microphone"` no iframe de voz (essencial para o microfone funcionar).
-
-## Layout final
+Substituir em `src/index.css` os tokens `--gold*` (cor principal) e os `--dark*` (fundo) por:
 
 ```text
-┌─ Tab: Chat WhatsApp ────────────────┬─ Dados em tempo real ─┐
-│ [Header: B · Barberalia · Online]    │ Cliente: João M.      │
-│ ┌─ iframe ElevenLabs ────────────┐   │ Intenção: Pós-venda   │
-│ │  conversa real, fundo escuro   │   │ Encomenda: #BC-…      │
-│ │  ocupa toda a área             │   │ Estado: Em trânsito   │
-│ │                                │   │ Escalada: Não nec.    │
-│ └────────────────────────────────┘   │                       │
-└──────────────────────────────────────┴───────────────────────┘
-
-┌─ Tab: Agente de Voz ────────────────────────────────────────┐
-│  Agente de Voz                  ┌─ iframe ElevenLabs ─────┐ │
-│  • voz natural PT               │  orb + botão microfone  │ │
-│  • stock em tempo real          │  conversa por voz       │ │
-│  • escala para humano           │                         │ │
-│                                 └─────────────────────────┘ │
-└─────────────────────────────────────────────────────────────┘
+Primária   (laranja Friparque): ~#E8631A
+Secundária (azul técnico):       ~#1E3A8A / acento #3B82F6
+Neutros:   fundo claro #F7F7F5, dark slate #0F172A, cinza #475569
+Estado verde/vermelho: manter (semáforos do dashboard)
 ```
 
-## Ficheiros a alterar
+Decisão a tomar contigo: **fundo escuro com acentos laranja/azul** (mantém o "feel" premium atual) **ou** **fundo claro estilo retalho/loja online** (mais próximo do site real Friparque). Por defeito proponho **manter dark + acentos laranja/azul** para preservar o impacto visual da demo.
 
-- **`index.html`** — remover o `<script>` do `convai-widget-embed` (já não é preciso).
-- **`src/components/barberalia/DemoSection.tsx`** — substituir os dois `<elevenlabs-convai>` por `<iframe src="https://elevenlabs.io/app/talk-to?agent_id=...">`, com renderização condicional rígida (sem Fragment partilhado), `allow="microphone"` no de voz, e moldura visual coerente.
-- **`src/vite-env.d.ts`** — remover a declaração do custom element `elevenlabs-convai` (deixa de ser usada).
-- **`src/index.css`** — remover as regras `elevenlabs-convai { ... }` adicionadas anteriormente.
+Tokens novos a renomear semanticamente: `--gold` → `--brand` (laranja), introduzir `--accent-blue`. Todos os usos `gold/gold-light/gold-pale` nos componentes passam a `brand/brand-light/...` via find-replace controlado.
 
-## Notas
+## 3. Conteúdo por secção
 
-- **Allowed origins**: confirma novamente no painel ElevenLabs de cada agente que `https://*.lovable.app` está autorizado — o iframe respeita as mesmas regras CORS do widget.
-- **Sem bolhas flutuantes**: garantido — o iframe é um elemento DOM normal, não injecta nada no `body`.
-- **Tema do interior**: o conteúdo do iframe é controlado pelo ElevenLabs (não conseguimos mudar fontes/cores internas sem usar o SDK React). O que ganhamos é controlo total do **enquadramento** — borda dourada, fundo escuro, posicionamento perfeito — que era o problema principal.
-- **Sem alterações** ao Hero, Dashboard, Roadmap, Footer, Navbar ou tabs.
+- **Hero** (`Hero.tsx`): título e subtítulo para "Sistema IA para peças de eletrodomésticos", métricas adaptadas (categorias, referências, marcas suportadas).
+- **WhatWorks** (`WhatWorks.tsx`): exemplos de casos passam de barbearia (cortes, marcação, produtos) para Friparque (consulta de stock por modelo/referência, compatibilidade de peças, prazos de entrega, devoluções, faturação B2B).
+- **DemoSection** (`DemoSection.tsx`):
+  - Header do chat: "Friparque Atendimento", letra "F".
+  - Painel lateral "Dados em tempo real": cliente, intenção ("Procura peça · resistência forno Bosch"), referência (`#FP-2025-…`), estado ("Em stock · envio 24h"), escalada.
+  - Contextual update enviado ao agente ElevenLabs: texto adaptado ao domínio Friparque (continuar a indicar modo chat de texto e que pode enviar URLs do catálogo `pecas.friparque.pt`).
+  - Bloco final: "base de conhecimento Friparque — catálogo, compatibilidades, encomendas e devoluções indexados".
+- **Dashboard** (`Dashboard.tsx`): KPIs e legendas adaptados (ex.: "Pedidos de compatibilidade", "Procuras sem stock", "Conversões → checkout"). Mantém-se gráficos e estrutura.
+- **Roadmap** (`Roadmap.tsx`): fases reescritas para o contexto Friparque (integração catálogo, OCR de chapa de características, recomendação de peças compatíveis, integração ERP).
+- **Projecao** (`Projecao.tsx`): números de projeção reescritos para volumes plausíveis de e-commerce de peças.
+- **Navbar** (`Navbar.tsx`): label "BARBERALIA" → "FRIPARQUE".
 
+## 4. Agentes ElevenLabs
+
+- IDs **mantêm-se** (reutilizar os atuais) conforme pedido.
+- Só muda o `sendContextualUpdate` no `DemoSection.tsx` para descrever o negócio Friparque, catálogo em `pecas.friparque.pt` e regras (envio de links de produto/checkout permitido).
+
+## 5. SEO
+
+- `<title>` e `<meta description>` em `index.html` reescritos (≤60 / ≤160 chars) com foco em "Friparque · Atendimento IA para peças de eletrodomésticos".
+- OG/Twitter image: manter placeholder ou gerar nova imagem laranja/azul.
+- Canonical relativo (`/`) — sem domínio fixo.
+
+## 6. Ficheiros tocados (resumo)
+
+```text
+src/index.css                              tokens de cor (gold→brand, dark mantém-se)
+tailwind.config.ts                         aliases de cor, se necessário
+src/components/barberalia/Navbar.tsx       label
+src/components/barberalia/Hero.tsx         copy + métricas
+src/components/barberalia/WhatWorks.tsx    casos de uso
+src/components/barberalia/DemoSection.tsx  header chat, painel lateral, contextual update
+src/components/barberalia/Dashboard.tsx    KPIs e legendas
+src/components/barberalia/Roadmap.tsx      fases
+src/components/barberalia/Projecao.tsx     números
+src/components/barberalia/Footer.tsx       nome + morada
+index.html                                 SEO + favicon
+```
+
+Não se mexe em: estrutura de componentes, integração ElevenLabs, integração Supabase/Cloud, lógica de scroll/animations.
+
+## 7. Fora de âmbito (para confirmares depois)
+
+- Ligação real ao catálogo `pecas.friparque.pt` (scraping/Firecrawl) — só se quiseres mais tarde.
+- Criação de novos agentes ElevenLabs específicos Friparque.
+- Mudança para tema claro (atualmente proposto manter dark).
+- Domínio personalizado e logo definitivo.
+
+Se aprovares, começo pelo branding (tokens + Navbar + Footer + index.html) e depois desço secção a secção pelo copy.
