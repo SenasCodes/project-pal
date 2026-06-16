@@ -8,15 +8,18 @@
 
 @layer base {
   :root {
-    /* Brand palette (Barberalia) */
-    --gold: 34 36% 54%;            /* #B8955A */
-    --gold-light: 36 47% 67%;      /* #D4B483 */
-    --gold-pale: 44 60% 90%;       /* #F5EDD8 */
+    /* Brand palette (Friparque) — laranja técnico + azul industrial */
+    --gold: 22 85% 51%;            /* #E8631A · laranja principal */
+    --gold-light: 28 92% 62%;      /* #F4904A · laranja claro */
+    --gold-pale: 30 90% 92%;       /* #FDE7D4 · laranja pale */
 
-    --dark: 60 7% 5%;              /* #0E0E0C */
-    --dark-2: 60 8% 9%;            /* #161614 */
-    --dark-3: 60 9% 12%;           /* #1E1E1B */
-    --dark-4: 50 8% 14%;           /* #262622 */
+    --accent-blue: 217 76% 33%;    /* #1E3A8A · azul técnico */
+    --accent-blue-light: 217 91% 60%; /* #3B82F6 */
+
+    --dark: 222 47% 7%;            /* #0B1220 · slate quase preto */
+    --dark-2: 222 40% 11%;         /* #111A2B */
+    --dark-3: 222 32% 16%;         /* #1B2638 */
+    --dark-4: 222 25% 22%;         /* #2A364B */
 
     --text: 41 24% 89%;            /* #E8E4DC */
     --text-muted: 44 8% 51%;       /* #8A8578 */
