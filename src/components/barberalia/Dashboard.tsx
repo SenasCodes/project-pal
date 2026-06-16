@@ -173,9 +173,9 @@ function KpiDetail({ id, onResolveEscalation }: { id: string; onResolveEscalatio
 function ConversationDetail({ conv }: { conv: Conv }) {
   const tline: { who: "c" | "a"; t: string; text: string }[] = [
     { who: "c", t: conv.time, text: conv.msg },
-    { who: "a", t: conv.time, text: "Claro, estou a verificar a sua questão — um momento." },
+    { who: "a", t: conv.time, text: "Claro, estou a verificar — um momento." },
     { who: "c", t: conv.time, text: "Obrigado, aguardo." },
-    { who: "a", t: conv.time, text: "Encontrei a informação. A sua encomenda está em rota via Nacex, tracking NX20250402PT3120." },
+    { who: "a", t: conv.time, text: "Encontrei a referência. A peça está em stock e a sua encomenda segue via CTT Expresso, tracking RR20250402PT3120." },
   ];
   return (
     <>
