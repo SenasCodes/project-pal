@@ -144,7 +144,7 @@ function KpiDetail({ id, onResolveEscalation }: { id: string; onResolveEscalatio
     );
   }
   if (id === "res") {
-    const bars: [string, number][] = [["Pré-venda", 94], ["Pós-venda", 82], ["Devoluções", 71]];
+    const bars: [string, number][] = [["Procura de peça", 94], ["Pós-venda · tracking", 82], ["Devoluções", 71]];
     return (
       <div className="flex flex-col gap-5">
         {bars.map(([l, v]) => (
